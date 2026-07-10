@@ -1,8 +1,9 @@
-const CACHE_NAME = "price-action-review-v1.0.0";
+const CACHE_NAME = "price-action-review-v20260710-2238";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./version.json",
   "./assets/icon.svg",
   "./src/app.js",
   "./src/data.js",
