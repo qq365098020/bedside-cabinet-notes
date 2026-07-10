@@ -1,0 +1,14 @@
+{
+  "name": "price-action-review-app",
+  "version": "20260710-2246",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build && node scripts/copy-static.mjs",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "devDependencies": {
+    "vite": "^7.0.4"
+  }
+}

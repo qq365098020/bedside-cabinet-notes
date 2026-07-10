@@ -1,20 +1,18 @@
-const CACHE_NAME = "price-action-review-v20260710-2246";
+const CACHE_NAME = "price-action-review-v20260710-2342";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./version.json",
-  "./assets/icon.svg",
-  "./src/app.js",
-  "./src/data.js",
-  "./src/storage.js",
-  "./src/stats.js",
-  "./src/backup.js",
-  "./src/styles.css"
+  "./assets/icon.svg"
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(CORE_ASSETS.map((asset) => cache.add(asset)))
+    )
+  );
   self.skipWaiting();
 });
 

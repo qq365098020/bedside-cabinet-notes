@@ -1808,6 +1808,19 @@ class PriceActionReviewApp {
           <div class="modal-body">
             <div class="settings-grid">
               <section class="settings-card">
+                <h3>远程存储状态</h3>
+                <div class="list-compact">
+                  <div class="list-row">
+                    <strong>D1/R2 尚未配置</strong>
+                    <span class="muted">当前账号环境没有可调用的 D1/R2 创建或绑定工具，主数据仍保留在本地版本中，避免破坏现有可运行状态。</span>
+                  </div>
+                  <div class="list-row">
+                    <strong>本地缓存用途</strong>
+                    <span class="muted">草稿、待同步队列、少量最近记录、缩略图缓存和界面偏好。</span>
+                  </div>
+                </div>
+              </section>
+              <section class="settings-card">
                 <h3>备份与导入</h3>
                 <div class="form-grid">
                   <button class="primary-btn" data-action="export-backup">完整 ZIP 备份</button>

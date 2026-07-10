@@ -1,0 +1,8 @@
+{
+  "project_id": "appgprj_6a51120ddad08191bb2c34576df498fd",
+  "source": {
+    "provider": "cloudflare_artifact",
+    "repository": "appgprj_6a51120ddad08191bb2c34576df498fd",
+    "branch": "main"
+  }
+}
