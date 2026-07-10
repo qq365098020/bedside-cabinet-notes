@@ -29,7 +29,16 @@ git add -A
 git commit -m "v${TIMESTAMP}: ${COMMIT_MSG}" || true
 git push "https://${OWNER}:${TOKEN}@github.com/${OWNER}/${REMOTE_REPO}.git" "$BRANCH"
 
+PAGES_HTTP=$(curl -sS -o /tmp/price_action_pages_status.json -w '%{http_code}' \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Accept: application/vnd.github+json' \
+  "https://api.github.com/repos/${OWNER}/${REMOTE_REPO}/pages")
+
 echo ""
-echo "部署成功"
+echo "推送成功"
 echo "版本: ${TIMESTAMP}"
-echo "链接: https://${OWNER}.github.io/${REMOTE_REPO}/?v=${TIMESTAMP}"
+if [ "$PAGES_HTTP" = "200" ]; then
+  echo "链接: https://${OWNER}.github.io/${REMOTE_REPO}/?v=${TIMESTAMP}"
+else
+  echo "GitHub Pages 当前未启用，公开链接不会更新。"
+fi
