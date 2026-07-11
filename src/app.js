@@ -2314,14 +2314,14 @@ class PriceActionReviewApp {
     this.formTrade = null;
     this.strategyDraft = null;
     this.viewer = null;
-    if (!closingNode || prefersReducedMotion()) {
+    if (!closingNode) {
       modalRoot.innerHTML = "";
       return;
     }
     closingNode.classList.add("is-closing");
     window.setTimeout(() => {
       if (modalRoot.firstElementChild === closingNode) modalRoot.innerHTML = "";
-    }, 180);
+    }, 460);
   }
 }
 
@@ -2393,10 +2393,6 @@ function csvCell(value) {
 
 function getCss(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-
-function prefersReducedMotion() {
-  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 }
 
 function easeOutCubic(value) {
