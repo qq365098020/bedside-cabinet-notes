@@ -259,23 +259,24 @@ class PriceActionReviewApp {
 
   renderBottomNav() {
     const tabs = [
-      ["futures", "期货", "⌁"],
-      ["fx", "黄金外汇", "◇"],
-      ["btc", "BTC", "₿"],
-      ["summary", "汇总数据", "≋"],
-      ["settings", "设置", "⚙"]
+      { tab: "futures", label: "期货", image: "assets/nav-futures.jpg" },
+      { tab: "fx", label: "黄金外汇", image: "assets/nav-fx.jpg" },
+      { tab: "btc", label: "BTC", image: "assets/nav-btc.jpg" },
+      { tab: "summary", label: "汇总数据", icon: "≋" },
+      { tab: "settings", label: "设置", icon: "⚙" }
     ];
     return `
       <nav class="bottom-nav" aria-label="底部导航">
         ${tabs
-          .map(
-            ([tab, label, icon]) => `
+          .map(({ tab, label, icon, image }) => {
+            const iconMarkup = image ? `<img class="nav-icon-img" src="${image}" alt="">` : icon;
+            return `
               <button class="nav-item ${this.activeTab === tab ? "active" : ""}" data-action="switch-tab" data-tab="${tab}">
-                <span class="nav-icon">${icon}</span>
+                <span class="nav-icon" aria-hidden="true">${iconMarkup}</span>
                 <span class="nav-label">${label}</span>
               </button>
-            `
-          )
+            `;
+          })
           .join("")}
       </nav>
     `;

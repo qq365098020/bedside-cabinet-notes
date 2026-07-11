@@ -10,6 +10,7 @@ async function exists(path) {
 }
 
 const hasSitesConfig = await exists(".openai/hosting.json");
+const assetFiles = ["icon.svg", "nav-futures.jpg", "nav-fx.jpg", "nav-btc.jpg"];
 
 await mkdir("dist/assets", { recursive: true });
 
@@ -17,7 +18,7 @@ const copyTasks = [
   copyFile("sw.js", "dist/sw.js"),
   copyFile("manifest.json", "dist/manifest.json"),
   copyFile("version.json", "dist/version.json"),
-  copyFile("assets/icon.svg", "dist/assets/icon.svg")
+  ...assetFiles.map((file) => copyFile(`assets/${file}`, `dist/assets/${file}`))
 ];
 
 if (hasSitesConfig) {
