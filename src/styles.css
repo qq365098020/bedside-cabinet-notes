@@ -31,9 +31,9 @@
   --blur: blur(28px) saturate(1.7);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
-  --motion-fast: 160ms;
-  --motion: 280ms;
-  --motion-slow: 520ms;
+  --motion-fast: 420ms;
+  --motion: 760ms;
+  --motion-slow: 1200ms;
   --radius-lg: 24px;
   --radius: 18px;
   --radius-sm: 12px;
@@ -169,15 +169,15 @@ button {
 }
 
 .screen-inner > *:nth-child(2) {
-  animation-delay: 40ms;
+  animation-delay: 120ms;
 }
 
 .screen-inner > *:nth-child(3) {
-  animation-delay: 75ms;
+  animation-delay: 220ms;
 }
 
 .screen-inner > *:nth-child(n + 4) {
-  animation-delay: 100ms;
+  animation-delay: 320ms;
 }
 
 .topbar {
@@ -1394,7 +1394,7 @@ button {
 @keyframes contentRise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -1405,7 +1405,7 @@ button {
 @keyframes itemRise {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.985);
+    transform: translateY(20px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -1416,7 +1416,7 @@ button {
 @keyframes fieldIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -1427,7 +1427,7 @@ button {
 @keyframes sheetIn {
   from {
     opacity: 0;
-    transform: translateY(26px) scale(0.98);
+    transform: translateY(42px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -1442,19 +1442,19 @@ button {
   }
   to {
     opacity: 0;
-    transform: translateY(18px) scale(0.985);
+    transform: translateY(30px) scale(0.97);
   }
 }
 
 @keyframes activePop {
-  0% { transform: scale(0.96); }
+  0% { transform: scale(0.88); }
   100% { transform: scale(1); }
 }
 
 @keyframes fabIn {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.9);
+    transform: translateY(34px) scale(0.82);
   }
   to {
     opacity: 1;
@@ -1465,7 +1465,7 @@ button {
 @keyframes navIn {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(32px);
   }
   to {
     opacity: 1;
@@ -1481,7 +1481,7 @@ button {
 @keyframes detailsIn {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-14px);
   }
   to {
     opacity: 1;
@@ -1492,7 +1492,7 @@ button {
 @keyframes imageReveal {
   from {
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.08);
   }
   to {
     opacity: 1;
@@ -1501,7 +1501,7 @@ button {
 }
 
 @keyframes toastDrop {
-  0% { transform: translate(-50%, -12px); }
+  0% { transform: translate(-50%, -24px); }
   100% { transform: translate(-50%, 0); }
 }
 
