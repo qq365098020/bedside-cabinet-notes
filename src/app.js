@@ -55,7 +55,8 @@ class PriceActionReviewApp {
       futures: {},
       fx: {},
       btc: {},
-      summary: { market: "all" }
+      summary: { market: "all" },
+      settings: {}
     };
     this.formTrade = null;
     this.formStage = "plan";
@@ -71,6 +72,7 @@ class PriceActionReviewApp {
 
   bindEvents() {
     root.addEventListener("click", (event) => this.handleClick(event));
+    root.addEventListener("change", (event) => this.handleChange(event));
     modalRoot.addEventListener("click", (event) => this.handleClick(event));
     modalRoot.addEventListener("input", (event) => this.handleInput(event));
     modalRoot.addEventListener("change", (event) => this.handleChange(event));
@@ -165,12 +167,14 @@ class PriceActionReviewApp {
       "open-data": () => this.openDataSheet(),
       "export-backup": () => this.exportBackup(),
       "export-csv": () => this.exportCsv(),
-      "trigger-import": () => modalRoot.querySelector("#backupImport")?.click(),
+      "trigger-import": () => (modalRoot.querySelector("#backupImport") || root.querySelector("#pageBackupImport"))?.click(),
+      "trigger-page-import": () => root.querySelector("#pageBackupImport")?.click(),
       "confirm-import": () => this.confirmImport(),
+      "check-update": () => this.checkUpdate(),
       "set-theme": () => {
         this.state.settings.theme = dataset.theme;
         this.persist();
-        this.openDataSheet();
+        this.refreshSettingsSurface();
       },
       "open-strategy": () => this.openStrategyEditor(dataset.id),
       "new-strategy": () => this.openStrategyEditor("new"),
@@ -205,7 +209,7 @@ class PriceActionReviewApp {
       this.handleFiles(target.files, target.dataset.upload);
       target.value = "";
     }
-    if (target.id === "backupImport" && target.files?.[0]) {
+    if ((target.id === "backupImport" || target.id === "pageBackupImport") && target.files?.[0]) {
       this.inspectImport(target.files[0]);
       target.value = "";
     }
@@ -232,13 +236,20 @@ class PriceActionReviewApp {
   }
 
   render() {
+    const page =
+      this.activeTab === "summary"
+        ? this.renderSummaryPage()
+        : this.activeTab === "settings"
+          ? this.renderSettingsPage()
+          : this.renderMarketPage(this.activeTab);
+    const showFab = ["futures", "fx", "btc"].includes(this.activeTab);
     root.innerHTML = `
       <main class="screen">
         <div class="screen-inner">
-          ${this.activeTab === "summary" ? this.renderSummaryPage() : this.renderMarketPage(this.activeTab)}
+          ${page}
         </div>
       </main>
-      ${this.activeTab !== "summary" ? `<button class="fab" data-action="new-trade" data-market="${this.activeTab}" aria-label="新建交易">+</button>` : ""}
+      ${showFab ? `<button class="fab" data-action="new-trade" data-market="${this.activeTab}" aria-label="新建交易">+</button>` : ""}
       ${this.renderBottomNav()}
     `;
     this.hydrateThumbs();
@@ -250,7 +261,8 @@ class PriceActionReviewApp {
       ["futures", "期货", "⌁"],
       ["fx", "黄金外汇", "◇"],
       ["btc", "BTC", "₿"],
-      ["summary", "汇总数据", "≋"]
+      ["summary", "汇总数据", "≋"],
+      ["settings", "设置", "⚙"]
     ];
     return `
       <nav class="bottom-nav" aria-label="底部导航">
@@ -265,6 +277,84 @@ class PriceActionReviewApp {
           )
           .join("")}
       </nav>
+    `;
+  }
+
+  renderSettingsPage() {
+    const activeTrades = this.state.trades.filter((trade) => !trade.deletedAt);
+    const draftCount = Object.values(this.state.drafts || {}).filter(Boolean).length;
+    const releaseVersion = currentReleaseVersion();
+    const lastBackup = this.state.settings.lastBackupAt || "未备份";
+    const trashCount = (this.state.trash || []).length;
+    return `
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">数据与应用设置</p>
+          <h1>设置</h1>
+          <p class="eyebrow">版本 ${escapeHtml(releaseVersion)} · 数据结构 ${APP_VERSION}</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" data-action="check-update" aria-label="检查更新">↻</button>
+          <button class="icon-btn" data-action="open-data" aria-label="更多设置">⋯</button>
+        </div>
+      </header>
+
+      <section class="settings-grid">
+        <section class="settings-card settings-card-wide">
+          <div class="split">
+            <h3>备份与导入</h3>
+            <span class="badge">ZIP</span>
+          </div>
+          <div class="form-grid two-col">
+            <button class="primary-btn" data-action="export-backup">导出完整备份</button>
+            <button class="ghost-btn" data-action="trigger-page-import">导入备份</button>
+            <button class="ghost-btn" data-action="export-csv">导出 CSV 表格</button>
+            <button class="ghost-btn" data-action="check-update">检查更新</button>
+            <input id="pageBackupImport" type="file" accept=".zip,application/zip" class="hidden">
+          </div>
+        </section>
+
+        <section class="settings-card">
+          <h3>版本与数据</h3>
+          <div class="kv-grid">
+            ${this.kv("当前版本", releaseVersion)}
+            ${this.kv("最近备份", lastBackup)}
+            ${this.kv("交易数量", activeTrades.length)}
+            ${this.kv("回收站", trashCount)}
+            ${this.kv("待同步草稿", draftCount)}
+            ${this.kv("策略数量", this.state.strategies.length)}
+            ${this.kv("期货预设", this.state.settings.futuresPresets.length)}
+            ${this.kv("存储模式", "本地可运行版")}
+          </div>
+        </section>
+
+        <section class="settings-card">
+          <h3>外观</h3>
+          <div class="quick-row">
+            ${[
+              ["system", "跟随系统"],
+              ["light", "浅色"],
+              ["dark", "深色"]
+            ]
+              .map(([theme, label]) => `<button class="chip ${this.state.settings.theme === theme ? "active" : ""}" data-action="set-theme" data-theme="${theme}">${label}</button>`)
+              .join("")}
+          </div>
+        </section>
+
+        <section class="settings-card">
+          <h3>远程存储状态</h3>
+          <div class="list-compact">
+            <div class="list-row">
+              <strong>D1/R2 尚未接入当前可发布版本</strong>
+              <span class="muted">当前先保留 GitHub Pages 可调试版本，避免 Sites 访问异常影响录入和备份。</span>
+            </div>
+            <div class="list-row">
+              <strong>完整备份</strong>
+              <span class="muted">备份 ZIP 包含交易数据、截图、缩略图、策略库、标签、预设和设置。</span>
+            </div>
+          </div>
+        </section>
+      </section>
     `;
   }
 
@@ -1909,13 +1999,47 @@ class PriceActionReviewApp {
     `;
   }
 
+  refreshSettingsSurface() {
+    if (this.activeTab === "settings" && !modalRoot.innerHTML.trim()) this.render();
+    else this.openDataSheet();
+  }
+
+  async checkUpdate() {
+    const currentVersion = currentReleaseVersion();
+    this.toast("正在检查更新");
+    try {
+      const response = await fetch(`./version.json?check=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("版本文件读取失败");
+      const remote = await response.json();
+      const latestVersion = String(remote.version || "").trim();
+      if (!latestVersion) throw new Error("版本号为空");
+
+      if (latestVersion === currentVersion) {
+        this.toast(`已是最新版本 ${currentVersion}`);
+        return;
+      }
+
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.update().catch(() => {})));
+      }
+
+      this.toast(`发现新版本 ${latestVersion}，正在刷新`);
+      window.setTimeout(() => {
+        window.location.replace(`./?v=${encodeURIComponent(latestVersion)}`);
+      }, 700);
+    } catch (error) {
+      this.toast(error.message || "检查更新失败");
+    }
+  }
+
   async exportBackup() {
     const { blob, manifest } = await buildBackupZip();
     const fileName = `价格行为复盘完整备份-${manifest.backupCreatedAt.slice(0, 10)}.zip`;
     downloadBlob(blob, fileName);
     this.state.settings.lastBackupAt = new Date().toLocaleString("zh-CN");
     this.persist();
-    this.openDataSheet();
+    this.refreshSettingsSurface();
     this.toast("完整备份已生成");
   }
 
@@ -2169,6 +2293,10 @@ function setByPath(object, path, value) {
 
 function getByPath(object, path) {
   return path.split(".").reduce((cursor, key) => cursor?.[key], object);
+}
+
+function currentReleaseVersion() {
+  return document.querySelector('meta[name="version"]')?.content || APP_VERSION;
 }
 
 function escapeHtml(value = "") {

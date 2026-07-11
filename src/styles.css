@@ -7,7 +7,9 @@
   color-scheme: light dark;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --nav-height: calc(72px + var(--safe-bottom));
+  --viewport-bottom-gap: 0px;
+  --bottom-safe: max(var(--safe-bottom), var(--viewport-bottom-gap));
+  --nav-height: calc(82px + var(--bottom-safe));
   --bg: #f4f7fb;
   --bg-soft: #edf3f7;
   --surface: rgba(255, 255, 255, 0.72);
@@ -80,9 +82,11 @@
 html,
 body {
   width: 100%;
-  min-height: 100%;
+  height: 100vh;
+  min-height: 100vh;
   margin: 0;
   overflow: hidden;
+  background-color: var(--bg-soft);
   background:
     linear-gradient(135deg, rgba(10, 132, 255, 0.08), transparent 32%),
     linear-gradient(225deg, rgba(45, 191, 99, 0.1), transparent 36%),
@@ -91,6 +95,14 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
+}
+
+@supports (height: 100lvh) {
+  html,
+  body {
+    height: 100lvh;
+    min-height: 100lvh;
+  }
 }
 
 button,
@@ -107,12 +119,33 @@ button {
 .app-shell {
   position: relative;
   width: 100%;
-  min-height: 100dvh;
-  height: 100dvh;
+  height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
 }
 
+.app-shell::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  height: calc(var(--bottom-safe) + 26px);
+  background: linear-gradient(180deg, transparent, var(--bg-soft) 44%, var(--bg-soft));
+  pointer-events: none;
+}
+
+@supports (height: 100lvh) {
+  .app-shell {
+    height: 100lvh;
+    min-height: 100lvh;
+  }
+}
+
 .screen {
+  position: relative;
+  z-index: 1;
   height: 100%;
   padding: calc(var(--safe-top) + 14px) 14px var(--nav-height);
   overflow-y: auto;
@@ -446,14 +479,14 @@ button {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: calc(10px + var(--safe-bottom));
+  bottom: calc(10px + var(--bottom-safe));
   z-index: 30;
-  height: 62px;
+  height: 64px;
   max-width: 640px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
   padding: 6px;
   background: linear-gradient(135deg, var(--surface), var(--surface-muted));
   border: 1px solid var(--border-strong);
@@ -486,14 +519,15 @@ button {
 }
 
 .nav-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .fab {
   position: fixed;
   right: 22px;
-  bottom: calc(90px + var(--safe-bottom));
+  bottom: calc(96px + var(--bottom-safe));
   z-index: 28;
   width: 58px;
   height: 58px;
@@ -515,7 +549,7 @@ button {
   z-index: 50;
   display: grid;
   place-items: end center;
-  padding: calc(var(--safe-top) + 10px) 10px calc(var(--safe-bottom) + 10px);
+  padding: calc(var(--safe-top) + 10px) 10px calc(var(--bottom-safe) + 10px);
   background: rgba(9, 13, 18, 0.2);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -537,7 +571,13 @@ button {
 
 .modal-panel.fullscreen {
   width: min(100%, 1180px);
-  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 16px);
+  max-height: calc(100dvh - var(--safe-top) - var(--bottom-safe) - 16px);
+}
+
+@supports (height: 100lvh) {
+  .modal-panel.fullscreen {
+    max-height: calc(100lvh - var(--safe-top) - var(--bottom-safe) - 16px);
+  }
 }
 
 .modal-header {
@@ -1013,6 +1053,10 @@ button {
 @media (min-width: 900px) {
   .settings-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-card-wide {
+    grid-column: 1 / -1;
   }
 }
 
