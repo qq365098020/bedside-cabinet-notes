@@ -51,6 +51,8 @@ class PriceActionReviewApp {
   constructor() {
     this.state = loadState();
     this.activeTab = "futures";
+    this.tabOrder = ["futures", "fx", "btc", "summary", "settings"];
+    this.tabMotion = "";
     this.filters = {
       futures: {},
       fx: {},
@@ -65,6 +67,7 @@ class PriceActionReviewApp {
     this.chartAnimations = new Map();
     this.pendingInspection = null;
     this.viewer = null;
+    this.datePicker = null;
     this.applyTheme();
     this.bindEvents();
     this.registerServiceWorker();
@@ -83,7 +86,10 @@ class PriceActionReviewApp {
     modalRoot.addEventListener("drop", (event) => this.handleDrop(event));
     modalRoot.addEventListener("paste", (event) => this.handlePaste(event));
     window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") this.closeModal();
+      if (event.key === "Escape") {
+        if (this.datePicker) this.closeDatePicker();
+        else this.closeModal();
+      }
     });
   }
 
@@ -112,6 +118,17 @@ class PriceActionReviewApp {
   }
 
   handleClick(event) {
+    const dateTarget = event.target.closest("[data-date-picker]");
+    if (dateTarget) {
+      event.preventDefault();
+      this.openDatePicker(dateTarget.dataset.datePicker);
+      return;
+    }
+    if (event.target.matches("[data-date-picker-backdrop]")) {
+      event.preventDefault();
+      this.closeDatePicker();
+      return;
+    }
     const target = event.target.closest("[data-action]");
     if (!target) return;
     const action = target.dataset.action;
@@ -119,22 +136,21 @@ class PriceActionReviewApp {
     event.preventDefault();
 
     const handlers = {
-      "switch-tab": () => {
-        this.activeTab = dataset.tab;
-        this.render();
-      },
+      "switch-tab": () => this.switchTab(dataset.tab),
       "new-trade": () => this.openTradeForm({ market: dataset.market || this.activeTab, symbol: dataset.symbol }),
+      "delete-draft": () => this.deleteDraft(dataset.market),
       "copy-last": () => this.copyLastIntoForm(),
       "use-template": () => this.applyTemplate(dataset.templateId),
       "save-template": () => this.saveCurrentAsTemplate(),
-      "set-stage": () => {
-        this.formStage = dataset.stage;
-        this.renderTradeForm();
-      },
-      "set-choice": () => this.setFormPath(dataset.path, dataset.value),
+      "set-stage": () => this.setFormStage(dataset.stage),
+      "set-choice": () => this.setFormPath(dataset.path, dataset.value, { sourceButton: target }),
       "toggle-tag": () => this.toggleTag(dataset.path, dataset.value),
       "save-trade": () => this.saveTradeAndClose(),
       "close-modal": () => this.closeModal(),
+      "close-date-picker": () => this.closeDatePicker(),
+      "date-prev-month": () => this.shiftDatePickerMonth(-1),
+      "date-next-month": () => this.shiftDatePickerMonth(1),
+      "date-select": () => this.selectDate(dataset.date),
       "open-filter": () => this.openFilterSheet(dataset.scope),
       "clear-filters": () => {
         this.filters[dataset.scope] = dataset.scope === "summary" ? { market: "all" } : {};
@@ -186,7 +202,7 @@ class PriceActionReviewApp {
       "open-trade-list": () => this.openTradeListByIds(dataset.ids, dataset.title),
       "calendar-day": () => this.openTradeListByIds(dataset.ids, dataset.title),
       "mark-status": () => {
-        this.setFormPath("status", dataset.status);
+        this.setFormPath("status", dataset.status, { sourceButton: target });
       }
     };
 
@@ -237,6 +253,7 @@ class PriceActionReviewApp {
   }
 
   render() {
+    const motionClass = this.tabMotion ? `is-tab-transition tab-${this.tabMotion}` : "";
     const page =
       this.activeTab === "summary"
         ? this.renderSummaryPage()
@@ -245,19 +262,29 @@ class PriceActionReviewApp {
           : this.renderMarketPage(this.activeTab);
     const showFab = ["futures", "fx", "btc"].includes(this.activeTab);
     root.innerHTML = `
-      <main class="screen screen-${this.activeTab}" data-page="${this.activeTab}">
+      <main class="screen screen-${this.activeTab} ${motionClass}" data-page="${this.activeTab}">
         <div class="screen-inner">
           ${page}
         </div>
       </main>
       ${showFab ? `<button class="fab" data-action="new-trade" data-market="${this.activeTab}" aria-label="新建交易">+</button>` : ""}
-      ${this.renderBottomNav()}
+      ${this.renderBottomNav(motionClass)}
     `;
+    this.tabMotion = "";
     this.hydrateThumbs();
     this.drawCharts();
   }
 
-  renderBottomNav() {
+  switchTab(nextTab) {
+    if (!nextTab || nextTab === this.activeTab) return;
+    const currentIndex = this.tabOrder.indexOf(this.activeTab);
+    const nextIndex = this.tabOrder.indexOf(nextTab);
+    this.tabMotion = nextIndex >= currentIndex ? "forward" : "back";
+    this.activeTab = nextTab;
+    this.render();
+  }
+
+  renderBottomNav(motionClass = "") {
     const tabs = [
       { tab: "futures", label: "期货", image: "assets/nav-futures.jpg" },
       { tab: "fx", label: "黄金外汇", image: "assets/nav-fx.jpg" },
@@ -266,7 +293,7 @@ class PriceActionReviewApp {
       { tab: "settings", label: "设置", icon: "⚙" }
     ];
     return `
-      <nav class="bottom-nav" aria-label="底部导航">
+      <nav class="bottom-nav ${motionClass}" aria-label="底部导航">
         ${tabs
           .map(({ tab, label, icon, image }) => {
             const iconMarkup = image ? `<img class="nav-icon-img" src="${image}" alt="">` : icon;
@@ -432,9 +459,20 @@ class PriceActionReviewApp {
           <strong>有未完成草稿</strong>
           <div class="muted">${escapeHtml(draft.symbol || MARKETS[market].defaultSymbol)} · ${escapeHtml(draft.plan?.strategy || "")} · ${escapeHtml(draft.tradeDate || "")}</div>
         </div>
-        <button class="primary-btn" data-action="new-trade" data-market="${market}">继续</button>
+        <div class="row-actions">
+          <button class="danger-btn" data-action="delete-draft" data-market="${market}">删除</button>
+          <button class="primary-btn" data-action="new-trade" data-market="${market}">继续</button>
+        </div>
       </section>
     `;
+  }
+
+  deleteDraft(market) {
+    if (!market || !this.state.drafts?.[market]) return;
+    this.state.drafts[market] = null;
+    this.persist();
+    this.render();
+    this.toast("草稿已删除");
   }
 
   metric(label, value, signedValue = null, foot = "") {
@@ -567,16 +605,8 @@ class PriceActionReviewApp {
               <button class="small-icon-btn" data-action="close-modal" aria-label="关闭">×</button>
             </div>
           </header>
-          <div class="modal-body">
-            <div class="stage-tabs">
-              ${this.stageButton("plan", "入场计划")}
-              ${this.stageButton("result", "平仓结果")}
-              ${this.stageButton("review", "交易复盘")}
-            </div>
-            ${templates.length ? this.renderTemplateRow(templates) : ""}
-            ${this.formStage === "plan" ? this.renderPlanStage(trade) : ""}
-            ${this.formStage === "result" ? this.renderResultStage(trade) : ""}
-            ${this.formStage === "review" ? this.renderReviewStage(trade) : ""}
+          <div class="modal-body trade-form-body" data-trade-form-body>
+            ${this.renderTradeFormContent(trade, templates)}
           </div>
           <footer class="modal-footer">
             <button class="ghost-btn" data-action="close-modal">稍后继续</button>
@@ -586,6 +616,39 @@ class PriceActionReviewApp {
       </div>
     `;
     this.hydrateThumbs(modalRoot);
+  }
+
+  renderTradeFormContent(trade, templates = this.state.settings.templates || []) {
+    return `
+      <div class="stage-tabs">
+        ${this.stageButton("plan", "入场计划")}
+        ${this.stageButton("result", "平仓结果")}
+        ${this.stageButton("review", "交易复盘")}
+      </div>
+      ${templates.length ? this.renderTemplateRow(templates) : ""}
+      <div class="trade-stage-content">
+        ${this.formStage === "plan" ? this.renderPlanStage(trade) : ""}
+        ${this.formStage === "result" ? this.renderResultStage(trade) : ""}
+        ${this.formStage === "review" ? this.renderReviewStage(trade) : ""}
+      </div>
+    `;
+  }
+
+  setFormStage(stage) {
+    if (!stage || stage === this.formStage || !this.formTrade) return;
+    const stageOrder = ["plan", "result", "review"];
+    const direction = stageOrder.indexOf(stage) >= stageOrder.indexOf(this.formStage) ? "forward" : "back";
+    this.formStage = stage;
+    const body = modalRoot.querySelector("[data-trade-form-body]");
+    if (!body) {
+      this.renderTradeForm();
+      return;
+    }
+    body.classList.remove("stage-forward", "stage-back");
+    body.classList.add(`stage-${direction}`);
+    body.innerHTML = this.renderTradeFormContent(this.formTrade);
+    this.hydrateThumbs(modalRoot);
+    window.setTimeout(() => body.classList.remove("stage-forward", "stage-back"), 520);
   }
 
   stageButton(stage, label) {
@@ -609,7 +672,7 @@ class PriceActionReviewApp {
       <div class="form-grid">
         <div class="form-grid two-col">
           ${this.symbolField(trade)}
-          ${this.inputField("tradeDate", "交易日期", trade.tradeDate, "date")}
+          ${this.dateField("tradeDate", "交易日期", trade.tradeDate)}
           ${this.choiceField("direction", "多空方向", DIRECTIONS, trade.direction, "two")}
           ${this.choiceField("status", "当前状态", { planned: "计划中", holding: "持仓中" }, trade.status === "holding" ? "holding" : "planned", "two")}
         </div>
@@ -729,6 +792,91 @@ class PriceActionReviewApp {
         <input data-field="${path}" type="${type}" value="${escapeAttr(value ?? "")}" placeholder="${escapeAttr(placeholder)}" ${type === "number" ? 'inputmode="decimal"' : ""}>
       </div>
     `;
+  }
+
+  dateField(path, label, value = "") {
+    return `
+      <div class="field">
+        <label>${label}</label>
+        <button class="date-input" type="button" data-date-picker="${path}">${escapeHtml(value || "选择日期")}</button>
+      </div>
+    `;
+  }
+
+  openDatePicker(path) {
+    if (!this.formTrade) return;
+    const selected = getByPath(this.formTrade, path) || todayKey();
+    this.datePicker = {
+      path,
+      selected,
+      month: /^\d{4}-\d{2}/.test(selected) ? selected.slice(0, 7) : todayKey().slice(0, 7)
+    };
+    this.renderDatePicker();
+  }
+
+  renderDatePicker() {
+    if (!this.datePicker) return;
+    modalRoot.querySelector(".date-picker-backdrop")?.remove();
+    const [year, month] = this.datePicker.month.split("-").map(Number);
+    const first = new Date(year, month - 1, 1);
+    const days = new Date(year, month, 0).getDate();
+    const offset = (first.getDay() + 6) % 7;
+    const cells = [];
+    for (let i = 0; i < offset; i += 1) cells.push(`<div class="date-cell empty-day"></div>`);
+    for (let day = 1; day <= days; day += 1) {
+      const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const selected = date === this.datePicker.selected ? "selected" : "";
+      const today = date === todayKey() ? "today" : "";
+      cells.push(`<button class="date-cell ${selected} ${today}" data-action="date-select" data-date="${date}">${day}</button>`);
+    }
+    modalRoot.insertAdjacentHTML(
+      "beforeend",
+      `<div class="date-picker-backdrop" data-date-picker-backdrop>
+        <section class="date-picker-panel" role="dialog" aria-modal="true" aria-label="选择交易日期">
+          <header class="date-picker-head">
+            <button class="small-icon-btn" data-action="date-prev-month" aria-label="上个月">‹</button>
+            <strong>${year}年${month}月</strong>
+            <button class="small-icon-btn" data-action="date-next-month" aria-label="下个月">›</button>
+          </header>
+          <div class="date-week-row">
+            ${["一", "二", "三", "四", "五", "六", "日"].map((day) => `<span>${day}</span>`).join("")}
+          </div>
+          <div class="date-grid">${cells.join("")}</div>
+          <footer class="date-picker-footer">
+            <button class="ghost-btn" data-action="close-date-picker">取消</button>
+          </footer>
+        </section>
+      </div>`
+    );
+  }
+
+  shiftDatePickerMonth(delta) {
+    if (!this.datePicker) return;
+    const [year, month] = this.datePicker.month.split("-").map(Number);
+    const next = new Date(year, month - 1 + delta, 1);
+    this.datePicker.month = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
+    this.renderDatePicker();
+  }
+
+  selectDate(date) {
+    if (!this.datePicker || !date) return;
+    const path = this.datePicker.path;
+    this.datePicker.selected = date;
+    this.setFormPath(path, date, { silent: true });
+    const button = modalRoot.querySelector(`[data-date-picker="${cssEscape(path)}"]`);
+    if (button) button.textContent = date;
+    this.closeDatePicker();
+  }
+
+  closeDatePicker() {
+    const picker = modalRoot.querySelector(".date-picker-backdrop");
+    this.datePicker = null;
+    if (!picker || prefersReducedMotion()) {
+      picker?.remove();
+      return;
+    }
+    picker.classList.add("is-closing");
+    window.setTimeout(() => picker.remove(), 180);
   }
 
   textareaField(path, label, value = "", placeholder = "") {
@@ -872,7 +1020,18 @@ class PriceActionReviewApp {
     }
     this.recalculateFormTrade();
     this.autosaveDraft();
-    if (!options.silent) this.renderTradeForm();
+    if (options.sourceButton) this.syncSegmentedButton(options.sourceButton);
+    if (!options.silent && !options.sourceButton) this.renderTradeForm();
+  }
+
+  syncSegmentedButton(button) {
+    const group = button?.closest(".segmented, .stage-tabs");
+    if (!group) return;
+    group.querySelectorAll(".seg-btn").forEach((item) => item.classList.toggle("active", item === button));
+    group.classList.remove("segmented-forward");
+    void group.offsetWidth;
+    group.classList.add("segmented-forward");
+    window.setTimeout(() => group.classList.remove("segmented-forward"), 420);
   }
 
   toggleTag(path, value) {
@@ -903,7 +1062,27 @@ class PriceActionReviewApp {
     }
     this.recalculateFormTrade();
     this.autosaveDraft();
-    this.renderTradeForm();
+    if (path === "plan.strategy") {
+      this.renderTradeForm();
+      return;
+    }
+    this.syncTagButton(button, multi, getByPath(this.formTrade, path));
+  }
+
+  syncTagButton(button, multi, current) {
+    if (!button) return;
+    if (multi) {
+      const selected = Array.isArray(current) ? current : [];
+      button.closest(".tag-grid")?.querySelectorAll(".tag-chip").forEach((item) => {
+        item.classList.toggle("active", selected.includes(item.dataset.value));
+      });
+    } else {
+      button.closest(".tag-grid")?.querySelectorAll(".tag-chip").forEach((item) => {
+        item.classList.toggle("active", item === button);
+      });
+    }
+    button.closest(".tag-grid")?.classList.add("segmented-forward");
+    window.setTimeout(() => button.closest(".tag-grid")?.classList.remove("segmented-forward"), 420);
   }
 
   recalculateFormTrade() {
@@ -2312,16 +2491,21 @@ class PriceActionReviewApp {
 
   closeModal() {
     const closingNode = modalRoot.firstElementChild;
+    const draftMarket = this.formTrade && !this.state.trades.some((item) => item.id === this.formTrade.id) ? this.formTrade.market : "";
+    if (draftMarket) this.autosaveDraft();
     this.formTrade = null;
     this.strategyDraft = null;
     this.viewer = null;
+    this.datePicker = null;
     if (!closingNode) {
       modalRoot.innerHTML = "";
+      if (draftMarket && this.activeTab === draftMarket) this.render();
       return;
     }
     closingNode.classList.add("is-closing");
     window.setTimeout(() => {
       if (modalRoot.firstElementChild === closingNode) modalRoot.innerHTML = "";
+      if (draftMarket && this.activeTab === draftMarket) this.render();
     }, 460);
   }
 }
@@ -2394,6 +2578,10 @@ function csvCell(value) {
 
 function getCss(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 }
 
 function easeOutCubic(value) {

@@ -12,11 +12,11 @@
   --nav-height: calc(82px + var(--bottom-safe));
   --bg: #f4f7fb;
   --bg-soft: #edf3f7;
-  --surface: rgba(255, 255, 255, 0.72);
-  --surface-strong: rgba(255, 255, 255, 0.9);
-  --surface-muted: rgba(255, 255, 255, 0.46);
-  --border: rgba(125, 142, 164, 0.26);
-  --border-strong: rgba(255, 255, 255, 0.68);
+  --surface: rgba(255, 255, 255, 0.36);
+  --surface-strong: rgba(255, 255, 255, 0.56);
+  --surface-muted: rgba(255, 255, 255, 0.18);
+  --border: rgba(125, 142, 164, 0.2);
+  --border-strong: rgba(255, 255, 255, 0.42);
   --text: #171a20;
   --muted: rgba(23, 26, 32, 0.62);
   --faint: rgba(23, 26, 32, 0.38);
@@ -26,9 +26,9 @@
   --orange: #f59e0b;
   --indigo: #5967d8;
   --cyan: #0f9fb3;
-  --shadow: 0 18px 46px rgba(52, 72, 96, 0.16);
-  --soft-shadow: 0 10px 28px rgba(52, 72, 96, 0.1);
-  --blur: blur(28px) saturate(1.7);
+  --shadow: 0 18px 46px rgba(52, 72, 96, 0.11);
+  --soft-shadow: 0 10px 28px rgba(52, 72, 96, 0.07);
+  --blur: blur(34px) saturate(1.85);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --motion-fast: 420ms;
@@ -43,16 +43,16 @@
   :root {
     --bg: #101319;
     --bg-soft: #161b23;
-    --surface: rgba(28, 34, 44, 0.72);
-    --surface-strong: rgba(31, 38, 50, 0.94);
-    --surface-muted: rgba(38, 45, 58, 0.52);
-    --border: rgba(206, 220, 236, 0.16);
-    --border-strong: rgba(255, 255, 255, 0.16);
+    --surface: rgba(28, 34, 44, 0.38);
+    --surface-strong: rgba(31, 38, 50, 0.6);
+    --surface-muted: rgba(38, 45, 58, 0.24);
+    --border: rgba(206, 220, 236, 0.13);
+    --border-strong: rgba(255, 255, 255, 0.12);
     --text: #f3f6fb;
     --muted: rgba(243, 246, 251, 0.66);
     --faint: rgba(243, 246, 251, 0.42);
-    --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
-    --soft-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+    --shadow: 0 22px 58px rgba(0, 0, 0, 0.22);
+    --soft-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
   }
 }
 
@@ -60,11 +60,11 @@
   color-scheme: light;
   --bg: #f4f7fb;
   --bg-soft: #edf3f7;
-  --surface: rgba(255, 255, 255, 0.72);
-  --surface-strong: rgba(255, 255, 255, 0.9);
-  --surface-muted: rgba(255, 255, 255, 0.46);
-  --border: rgba(125, 142, 164, 0.26);
-  --border-strong: rgba(255, 255, 255, 0.68);
+  --surface: rgba(255, 255, 255, 0.36);
+  --surface-strong: rgba(255, 255, 255, 0.56);
+  --surface-muted: rgba(255, 255, 255, 0.18);
+  --border: rgba(125, 142, 164, 0.2);
+  --border-strong: rgba(255, 255, 255, 0.42);
   --text: #171a20;
   --muted: rgba(23, 26, 32, 0.62);
   --faint: rgba(23, 26, 32, 0.38);
@@ -74,11 +74,11 @@
   color-scheme: dark;
   --bg: #101319;
   --bg-soft: #161b23;
-  --surface: rgba(28, 34, 44, 0.72);
-  --surface-strong: rgba(31, 38, 50, 0.94);
-  --surface-muted: rgba(38, 45, 58, 0.52);
-  --border: rgba(206, 220, 236, 0.16);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  --surface: rgba(28, 34, 44, 0.38);
+  --surface-strong: rgba(31, 38, 50, 0.6);
+  --surface-muted: rgba(38, 45, 58, 0.24);
+  --border: rgba(206, 220, 236, 0.13);
+  --border-strong: rgba(255, 255, 255, 0.12);
   --text: #f3f6fb;
   --muted: rgba(243, 246, 251, 0.66);
   --faint: rgba(243, 246, 251, 0.42);
@@ -178,6 +178,25 @@ button {
 
 .screen-inner > *:nth-child(n + 4) {
   animation-delay: 320ms;
+}
+
+.screen.is-tab-transition {
+  animation: pageSlideForward var(--motion) var(--ease-out) both;
+}
+
+.screen.is-tab-transition.tab-back {
+  animation-name: pageSlideBack;
+}
+
+.screen.is-tab-transition .screen-inner > *,
+.screen.is-tab-transition .metric-grid > *,
+.screen.is-tab-transition .trade-list > *,
+.screen.is-tab-transition .summary-grid > *,
+.screen.is-tab-transition .settings-grid > *,
+.screen.is-tab-transition .timeline > *,
+.screen.is-tab-transition .bar-list > *,
+.screen.is-tab-transition .image-strip > * {
+  animation: none;
 }
 
 .topbar {
@@ -455,7 +474,7 @@ button {
 .filter-chip,
 .seg-btn.active,
 .tag-chip.active {
-  background: rgba(10, 132, 255, 0.15);
+  background: rgba(10, 132, 255, 0.1);
   border-color: rgba(10, 132, 255, 0.4);
   color: var(--blue);
   box-shadow: inset 0 1px 0 var(--border-strong), 0 8px 18px rgba(10, 132, 255, 0.12);
@@ -607,6 +626,34 @@ button {
   animation: navIn var(--motion-slow) var(--ease-out) both;
 }
 
+.bottom-nav.is-tab-transition {
+  animation: none;
+}
+
+.bottom-nav.is-tab-transition .nav-item {
+  animation: navButtonSlideForward var(--motion) var(--ease-out) both;
+}
+
+.bottom-nav.is-tab-transition.tab-back .nav-item {
+  animation-name: navButtonSlideBack;
+}
+
+.bottom-nav.is-tab-transition .nav-item:nth-child(2) {
+  animation-delay: 45ms;
+}
+
+.bottom-nav.is-tab-transition .nav-item:nth-child(3) {
+  animation-delay: 90ms;
+}
+
+.bottom-nav.is-tab-transition .nav-item:nth-child(4) {
+  animation-delay: 135ms;
+}
+
+.bottom-nav.is-tab-transition .nav-item:nth-child(5) {
+  animation-delay: 180ms;
+}
+
 .nav-item {
   display: grid;
   place-items: center;
@@ -623,7 +670,7 @@ button {
 }
 
 .nav-item.active {
-  background: rgba(10, 132, 255, 0.14);
+  background: rgba(10, 132, 255, 0.1);
   color: var(--blue);
 }
 
@@ -665,7 +712,7 @@ button {
   height: 58px;
   border-radius: 50%;
   border: 1px solid var(--border-strong);
-  background: linear-gradient(135deg, rgba(10, 132, 255, 0.88), rgba(45, 191, 99, 0.82));
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.66), rgba(45, 191, 99, 0.58));
   color: #fff;
   display: grid;
   place-items: center;
@@ -685,9 +732,9 @@ button {
   display: grid;
   place-items: end center;
   padding: calc(var(--safe-top) + 10px) 10px calc(var(--bottom-safe) + 10px);
-  background: rgba(9, 13, 18, 0.2);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(9, 13, 18, 0.1);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   animation: fadeIn var(--motion-fast) ease both;
 }
 
@@ -756,6 +803,18 @@ button {
   padding: 14px 16px 18px;
 }
 
+.trade-form-body.stage-forward .trade-stage-content,
+.trade-form-body.stage-forward .stage-tabs,
+.trade-form-body.stage-back .trade-stage-content,
+.trade-form-body.stage-back .stage-tabs {
+  animation: stageSlideForward var(--motion) var(--ease-out) both;
+}
+
+.trade-form-body.stage-back .trade-stage-content,
+.trade-form-body.stage-back .stage-tabs {
+  animation-name: stageSlideBack;
+}
+
 .modal-body > .form-grid,
 .modal-body > .settings-grid,
 .modal-body > .timeline,
@@ -790,9 +849,11 @@ button {
 }
 
 .primary-btn {
-  background: var(--blue);
+  background: rgba(10, 132, 255, 0.68);
   color: #fff;
   border-color: rgba(10, 132, 255, 0.55);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
 }
 
 .ghost-btn {
@@ -801,7 +862,7 @@ button {
 }
 
 .danger-btn {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(239, 68, 68, 0.08);
   color: var(--red);
   border-color: rgba(239, 68, 68, 0.28);
 }
@@ -842,6 +903,121 @@ button {
   background: transparent;
   box-shadow: none;
   border-color: transparent;
+}
+
+.segmented.segmented-forward .seg-btn.active,
+.stage-tabs.segmented-forward .seg-btn.active,
+.tag-grid.segmented-forward .tag-chip.active {
+  animation: stageButtonSlide var(--motion-fast) var(--ease-out) both;
+}
+
+.date-input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.date-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--safe-top) + 16px) 16px calc(var(--bottom-safe) + 16px);
+  background: rgba(9, 13, 18, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: fadeIn var(--motion-fast) ease both;
+}
+
+.date-picker-backdrop.is-closing {
+  pointer-events: none;
+  animation: fadeOut var(--motion-fast) var(--ease-in) both;
+}
+
+.date-picker-backdrop.is-closing .date-picker-panel {
+  animation: sheetOut var(--motion-fast) var(--ease-in) both;
+}
+
+.date-picker-panel {
+  width: min(100%, 360px);
+  padding: 14px;
+  border-radius: 22px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  animation: datePickerIn var(--motion) var(--ease-out) both;
+}
+
+.date-picker-head,
+.date-picker-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.date-week-row,
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.date-week-row {
+  margin: 14px 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.date-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
+}
+
+.date-cell.empty-day {
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.date-cell.today {
+  border-color: rgba(10, 132, 255, 0.4);
+}
+
+.date-cell.selected {
+  background: rgba(10, 132, 255, 0.62);
+  border-color: rgba(10, 132, 255, 0.72);
+  color: #fff;
+}
+
+.date-picker-footer {
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 .stage-tabs {
@@ -1364,6 +1540,13 @@ button {
     transform: translateX(110%);
   }
 
+  .date-input:hover,
+  .date-cell:not(.empty-day):hover {
+    transform: translateY(-1px);
+    border-color: rgba(10, 132, 255, 0.42);
+    background: rgba(10, 132, 255, 0.08);
+  }
+
   .image-tile:hover {
     transform: translateY(-2px) scale(1.02);
     border-color: rgba(10, 132, 255, 0.34);
@@ -1416,6 +1599,26 @@ button {
   }
 }
 
+@keyframes pageSlideForward {
+  from { transform: translateX(26px); }
+  to { transform: translateX(0); }
+}
+
+@keyframes pageSlideBack {
+  from { transform: translateX(-26px); }
+  to { transform: translateX(0); }
+}
+
+@keyframes navButtonSlideForward {
+  from { transform: translateX(12px); }
+  to { transform: translateX(0); }
+}
+
+@keyframes navButtonSlideBack {
+  from { transform: translateX(-12px); }
+  to { transform: translateX(0); }
+}
+
 @keyframes itemRise {
   from {
     opacity: 0;
@@ -1427,6 +1630,21 @@ button {
   }
 }
 
+@keyframes stageSlideForward {
+  from { transform: translateX(18px); }
+  to { transform: translateX(0); }
+}
+
+@keyframes stageSlideBack {
+  from { transform: translateX(-18px); }
+  to { transform: translateX(0); }
+}
+
+@keyframes stageButtonSlide {
+  from { transform: translateX(8px) scale(0.98); }
+  to { transform: translateX(0) scale(1); }
+}
+
 @keyframes fieldIn {
   from {
     opacity: 0;
@@ -1435,6 +1653,17 @@ button {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes datePickerIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
