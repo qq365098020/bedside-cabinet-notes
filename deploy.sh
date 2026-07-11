@@ -1,11 +1,11 @@
 #!/bin/bash
-# 价格行为交易复盘 APP 自动部署脚本
+# 床头柜尺寸记录页面自动部署脚本
 # 用法: bash deploy.sh "提交信息"
 set -e
 
 REPO="/home/oiio/Codex的工作台/价格行为交易复盘"
 OWNER="qq365098020"
-REMOTE_REPO="price-action-review-app"
+REMOTE_REPO="bedside-cabinet-notes"
 BRANCH="main"
 COMMIT_MSG="${1:-auto deploy}"
 
@@ -16,7 +16,7 @@ sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$TIMESTAMP\"/" "$REPO/manifest.
 sed -i "s|\"start_url\": \"[^\"]*\"|\"start_url\": \"./index.html?v=$TIMESTAMP\"|" "$REPO/manifest.json"
 printf '{"version":"%s"}\n' "$TIMESTAMP" > "$REPO/version.json"
 sed -i "s|<meta name=\"version\" content=\"[^\"]*\">|<meta name=\"version\" content=\"$TIMESTAMP\">|" "$REPO/index.html"
-sed -i "s|const CACHE_NAME = \"[^\"]*\"|const CACHE_NAME = \"price-action-review-v$TIMESTAMP\"|" "$REPO/sw.js"
+sed -i "s|const CACHE_NAME = \"[^\"]*\"|const CACHE_NAME = \"bedside-cabinet-notes-v$TIMESTAMP\"|" "$REPO/sw.js"
 
 TOKEN=$(strings -e l ~/桌面/各种API\ Key.wps 2>/dev/null | grep 'ghp_' | head -1)
 if [ -z "$TOKEN" ]; then
