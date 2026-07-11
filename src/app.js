@@ -62,6 +62,7 @@ class PriceActionReviewApp {
     this.formStage = "plan";
     this.detailTradeId = "";
     this.chartMaps = new Map();
+    this.chartAnimations = new Map();
     this.pendingInspection = null;
     this.viewer = null;
     this.applyTheme();
@@ -244,7 +245,7 @@ class PriceActionReviewApp {
           : this.renderMarketPage(this.activeTab);
     const showFab = ["futures", "fx", "btc"].includes(this.activeTab);
     root.innerHTML = `
-      <main class="screen">
+      <main class="screen screen-${this.activeTab}" data-page="${this.activeTab}">
         <div class="screen-inner">
           ${page}
         </div>
@@ -1592,6 +1593,8 @@ class PriceActionReviewApp {
 
   drawCharts() {
     if (!this.lastSummary) return;
+    this.chartAnimations.forEach((frameId) => cancelAnimationFrame(frameId));
+    this.chartAnimations.clear();
     const { stats } = this.lastSummary;
     root.querySelectorAll("canvas[data-chart]").forEach((canvas) => {
       const type = canvas.dataset.chart;
@@ -1610,13 +1613,16 @@ class PriceActionReviewApp {
     const ctx = canvas.getContext("2d");
     const width = canvas.clientWidth || 320;
     const height = 180;
-    ctx.clearRect(0, 0, width, height);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = getCss("--border");
-    ctx.beginPath();
-    ctx.moveTo(12, height - 28);
-    ctx.lineTo(width - 10, height - 28);
-    ctx.stroke();
+    const drawBase = () => {
+      ctx.clearRect(0, 0, width, height);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = getCss("--border");
+      ctx.beginPath();
+      ctx.moveTo(12, height - 28);
+      ctx.lineTo(width - 10, height - 28);
+      ctx.stroke();
+    };
+    drawBase();
     if (!rows.length) {
       ctx.fillStyle = getCss("--muted");
       ctx.font = "13px -apple-system";
@@ -1632,24 +1638,55 @@ class PriceActionReviewApp {
       const y = 16 + ((max - Number(row[key] || 0)) / span) * (height - 48);
       return { x, y, row };
     });
-    ctx.strokeStyle = key === "drawdown" ? getCss("--red") : getCss("--blue");
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    points.forEach((point, index) => {
-      if (index === 0) ctx.moveTo(point.x, point.y);
-      else ctx.lineTo(point.x, point.y);
-    });
-    ctx.stroke();
-    ctx.fillStyle = key === "drawdown" ? getCss("--red") : getCss("--blue");
-    points.forEach((point) => {
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.fillStyle = getCss("--muted");
-    ctx.font = "12px -apple-system";
     const last = values[values.length - 1];
-    ctx.fillText(options.percent ? `${Math.round(last * 100)}%` : key === "pnl" ? formatMoney(last) : formatR(last), 18, 18);
+    const strokeColor = key === "drawdown" ? getCss("--red") : getCss("--blue");
+    const labelText = options.percent ? `${Math.round(last * 100)}%` : key === "pnl" ? formatMoney(last) : formatR(last);
+    const drawFrame = (progress) => {
+      const revealX = points.length === 1 ? width : 16 + (width - 34) * progress;
+      drawBase();
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, revealX, height);
+      ctx.clip();
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = strokeColor;
+      points
+        .filter((point) => point.x <= revealX || progress >= 1)
+        .forEach((point) => {
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, progress * 1.8);
+      ctx.fillStyle = getCss("--muted");
+      ctx.font = "12px -apple-system";
+      ctx.fillText(labelText, 18, 18);
+      ctx.restore();
+    };
+    const duration = prefersReducedMotion() ? 0 : 620;
+    const start = performance.now();
+    const tick = (now) => {
+      const elapsed = now - start;
+      const progress = duration ? easeOutCubic(Math.min(1, elapsed / duration)) : 1;
+      drawFrame(progress);
+      if (progress < 1) {
+        this.chartAnimations.set(canvas, requestAnimationFrame(tick));
+      }
+    };
+    if (duration) {
+      this.chartAnimations.set(canvas, requestAnimationFrame(tick));
+    } else {
+      drawFrame(1);
+    }
     canvas.onclick = (event) => {
       const rect = canvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
@@ -2273,10 +2310,18 @@ class PriceActionReviewApp {
   }
 
   closeModal() {
-    modalRoot.innerHTML = "";
+    const closingNode = modalRoot.firstElementChild;
     this.formTrade = null;
     this.strategyDraft = null;
     this.viewer = null;
+    if (!closingNode || prefersReducedMotion()) {
+      modalRoot.innerHTML = "";
+      return;
+    }
+    closingNode.classList.add("is-closing");
+    window.setTimeout(() => {
+      if (modalRoot.firstElementChild === closingNode) modalRoot.innerHTML = "";
+    }, 180);
   }
 }
 
@@ -2348,6 +2393,14 @@ function csvCell(value) {
 
 function getCss(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+}
+
+function easeOutCubic(value) {
+  return 1 - Math.pow(1 - value, 3);
 }
 
 function canvasPoint(event) {

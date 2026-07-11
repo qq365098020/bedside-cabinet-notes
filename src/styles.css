@@ -29,6 +29,11 @@
   --shadow: 0 18px 46px rgba(52, 72, 96, 0.16);
   --soft-shadow: 0 10px 28px rgba(52, 72, 96, 0.1);
   --blur: blur(28px) saturate(1.7);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --motion-fast: 160ms;
+  --motion: 280ms;
+  --motion-slow: 520ms;
   --radius-lg: 24px;
   --radius: 18px;
   --radius-sm: 12px;
@@ -150,12 +155,29 @@ button {
   padding: calc(var(--safe-top) + 14px) 14px var(--nav-height);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 .screen-inner {
   width: min(100%, 1120px);
   margin: 0 auto;
   padding-bottom: 26px;
+}
+
+.screen-inner > * {
+  animation: contentRise var(--motion) var(--ease-out) both;
+}
+
+.screen-inner > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.screen-inner > *:nth-child(3) {
+  animation-delay: 75ms;
+}
+
+.screen-inner > *:nth-child(n + 4) {
+  animation-delay: 100ms;
 }
 
 .topbar {
@@ -205,7 +227,12 @@ button {
   -webkit-backdrop-filter: var(--blur);
   box-shadow: inset 0 1px 0 var(--border-strong), var(--soft-shadow);
   cursor: pointer;
-  transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    opacity var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
 }
 
 .icon-btn {
@@ -231,7 +258,11 @@ button {
 .fab:active,
 .primary-btn:active,
 .ghost-btn:active,
+.danger-btn:active,
 .chip:active,
+.filter-chip:active,
+.seg-btn:active,
+.tag-chip:active,
 .nav-item:active {
   transform: scale(0.94);
 }
@@ -261,11 +292,77 @@ button {
   box-shadow: var(--soft-shadow);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
+  transition:
+    transform var(--motion) var(--ease-out),
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    background var(--motion-fast) ease;
 }
 
 .metric-card {
   padding: 13px 14px;
   min-height: 82px;
+}
+
+.metric-grid > *,
+.trade-list > *,
+.summary-grid > *,
+.settings-grid > *,
+.timeline > *,
+.bar-list > *,
+.image-strip > * {
+  animation: itemRise var(--motion) var(--ease-out) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+.metric-grid > *:nth-child(1),
+.trade-list > *:nth-child(1),
+.summary-grid > *:nth-child(1),
+.settings-grid > *:nth-child(1),
+.timeline > *:nth-child(1),
+.bar-list > *:nth-child(1),
+.image-strip > *:nth-child(1) {
+  --stagger: 20ms;
+}
+
+.metric-grid > *:nth-child(2),
+.trade-list > *:nth-child(2),
+.summary-grid > *:nth-child(2),
+.settings-grid > *:nth-child(2),
+.timeline > *:nth-child(2),
+.bar-list > *:nth-child(2),
+.image-strip > *:nth-child(2) {
+  --stagger: 45ms;
+}
+
+.metric-grid > *:nth-child(3),
+.trade-list > *:nth-child(3),
+.summary-grid > *:nth-child(3),
+.settings-grid > *:nth-child(3),
+.timeline > *:nth-child(3),
+.bar-list > *:nth-child(3),
+.image-strip > *:nth-child(3) {
+  --stagger: 70ms;
+}
+
+.metric-grid > *:nth-child(4),
+.trade-list > *:nth-child(4),
+.summary-grid > *:nth-child(4),
+.settings-grid > *:nth-child(4),
+.timeline > *:nth-child(4),
+.bar-list > *:nth-child(4),
+.image-strip > *:nth-child(4) {
+  --stagger: 95ms;
+}
+
+.metric-grid > *:nth-child(n + 5),
+.trade-list > *:nth-child(n + 5),
+.summary-grid > *:nth-child(n + 5),
+.settings-grid > *:nth-child(n + 5),
+.timeline > *:nth-child(n + 5),
+.bar-list > *:nth-child(n + 5),
+.image-strip > *:nth-child(n + 5) {
+  --stagger: 120ms;
 }
 
 .metric-label {
@@ -346,7 +443,12 @@ button {
   white-space: nowrap;
   cursor: pointer;
   box-shadow: inset 0 1px 0 var(--border-strong);
-  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
 }
 
 .chip.active,
@@ -356,6 +458,13 @@ button {
   background: rgba(10, 132, 255, 0.15);
   border-color: rgba(10, 132, 255, 0.4);
   color: var(--blue);
+  box-shadow: inset 0 1px 0 var(--border-strong), 0 8px 18px rgba(10, 132, 255, 0.12);
+}
+
+.seg-btn.active,
+.tag-chip.active,
+.chip.active {
+  animation: activePop var(--motion-fast) var(--ease-out) both;
 }
 
 .filter-chip {
@@ -395,6 +504,7 @@ button {
   height: 100%;
   object-fit: cover;
   display: block;
+  animation: imageReveal var(--motion) var(--ease-out) both;
 }
 
 .trade-main {
@@ -494,6 +604,7 @@ button {
   box-shadow: var(--shadow);
   backdrop-filter: blur(34px) saturate(1.9);
   -webkit-backdrop-filter: blur(34px) saturate(1.9);
+  animation: navIn var(--motion-slow) var(--ease-out) both;
 }
 
 .nav-item {
@@ -505,12 +616,19 @@ button {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease;
 }
 
 .nav-item.active {
   background: rgba(10, 132, 255, 0.14);
   color: var(--blue);
+}
+
+.nav-item.active .nav-icon {
+  animation: activePop var(--motion-fast) var(--ease-out) both;
 }
 
 .nav-icon {
@@ -540,7 +658,10 @@ button {
   font-size: 30px;
   box-shadow: 0 18px 44px rgba(10, 132, 255, 0.26);
   cursor: pointer;
-  transition: transform 0.18s ease;
+  animation: fabIn var(--motion-slow) var(--ease-out) both;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) ease;
 }
 
 .modal-backdrop {
@@ -553,7 +674,7 @@ button {
   background: rgba(9, 13, 18, 0.2);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  animation: fadeIn 0.18s ease both;
+  animation: fadeIn var(--motion-fast) ease both;
 }
 
 .modal-panel {
@@ -566,7 +687,16 @@ button {
   border: 1px solid var(--border-strong);
   border-radius: 28px;
   box-shadow: var(--shadow);
-  animation: sheetIn 0.26s cubic-bezier(0.2, 0.82, 0.2, 1) both;
+  animation: sheetIn var(--motion) var(--ease-out) both;
+}
+
+.modal-backdrop.is-closing {
+  pointer-events: none;
+  animation: fadeOut var(--motion-fast) var(--ease-in) both;
+}
+
+.modal-backdrop.is-closing .modal-panel {
+  animation: sheetOut var(--motion-fast) var(--ease-in) both;
 }
 
 .modal-panel.fullscreen {
@@ -612,6 +742,15 @@ button {
   padding: 14px 16px 18px;
 }
 
+.modal-body > .form-grid,
+.modal-body > .settings-grid,
+.modal-body > .timeline,
+.modal-body > .stage-tabs,
+.modal-body > .quick-row,
+.modal-body > .kv-grid {
+  animation: contentRise var(--motion) var(--ease-out) both;
+}
+
 .modal-footer {
   display: flex;
   gap: 10px;
@@ -628,7 +767,12 @@ button {
   border: 1px solid var(--border);
   font-weight: 850;
   cursor: pointer;
-  transition: transform 0.18s ease, opacity 0.18s ease;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    background var(--motion-fast) ease;
 }
 
 .primary-btn {
@@ -686,6 +830,10 @@ button {
   border-color: transparent;
 }
 
+.stage-tabs {
+  animation: itemRise var(--motion) var(--ease-out) both;
+}
+
 .form-grid {
   display: grid;
   gap: 13px;
@@ -700,6 +848,7 @@ button {
 .field {
   display: grid;
   gap: 7px;
+  animation: fieldIn var(--motion) var(--ease-out) both;
 }
 
 .field label,
@@ -720,6 +869,18 @@ button {
   background: var(--surface);
   color: var(--text);
   outline: none;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: rgba(10, 132, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.12);
 }
 
 .field textarea {
@@ -739,13 +900,35 @@ button {
   border-radius: var(--radius);
   padding: 11px 12px 13px;
   background: rgba(125, 142, 164, 0.07);
+  overflow: hidden;
+  animation: itemRise var(--motion) var(--ease-out) both;
+  transition: border-color var(--motion-fast) ease, background var(--motion-fast) ease;
 }
 
 .advanced summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   cursor: pointer;
   font-weight: 850;
   color: var(--muted);
   list-style: none;
+}
+
+.advanced summary::after {
+  content: "⌄";
+  color: var(--faint);
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.advanced[open] {
+  border-color: rgba(10, 132, 255, 0.24);
+  background: rgba(10, 132, 255, 0.06);
+}
+
+.advanced[open] summary::after {
+  transform: rotate(180deg);
 }
 
 .advanced summary::-webkit-details-marker {
@@ -754,9 +937,11 @@ button {
 
 .advanced .form-grid {
   margin-top: 12px;
+  animation: detailsIn var(--motion) var(--ease-out) both;
 }
 
 .upload-zone {
+  position: relative;
   min-height: 118px;
   display: grid;
   place-items: center;
@@ -767,6 +952,21 @@ button {
   border-radius: var(--radius);
   background: rgba(125, 142, 164, 0.08);
   color: var(--muted);
+  overflow: hidden;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.upload-zone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateX(-110%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transition: transform var(--motion-slow) var(--ease-out);
 }
 
 .upload-zone strong {
@@ -793,6 +993,10 @@ button {
   border-radius: 16px;
   border: 1px solid var(--border);
   background: rgba(125, 142, 164, 0.12);
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
 }
 
 .image-tile img {
@@ -800,6 +1004,7 @@ button {
   height: 100%;
   object-fit: cover;
   display: block;
+  animation: imageReveal var(--motion) var(--ease-out) both;
 }
 
 .image-tile-actions {
@@ -808,6 +1013,11 @@ button {
   display: flex;
   justify-content: space-between;
   gap: 4px;
+  opacity: 0.92;
+  transform: translateY(4px);
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) ease;
 }
 
 .image-tile-actions button {
@@ -910,6 +1120,7 @@ button {
   gap: 8px;
   align-items: center;
   cursor: pointer;
+  transition: transform var(--motion-fast) var(--ease-out);
 }
 
 .bar-track {
@@ -923,6 +1134,8 @@ button {
   height: 100%;
   border-radius: inherit;
   background: var(--green);
+  transform-origin: left center;
+  animation: barGrow var(--motion-slow) var(--ease-out) both;
 }
 
 .bar-fill.neg {
@@ -953,6 +1166,10 @@ button {
   background: rgba(125, 142, 164, 0.08);
   font-size: 11px;
   cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
 }
 
 .calendar-day.empty-day {
@@ -995,11 +1212,14 @@ button {
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   font-weight: 800;
-  transition: transform 0.26s ease;
+  transition:
+    transform var(--motion) var(--ease-out),
+    opacity var(--motion-fast) ease;
 }
 
 .toast.show {
   transform: translate(-50%, 0);
+  animation: toastDrop var(--motion) var(--ease-out) both;
 }
 
 .viewer-stage {
@@ -1017,6 +1237,7 @@ button {
   max-width: 100%;
   max-height: 76dvh;
   touch-action: none;
+  transition: transform var(--motion-fast) var(--ease-out);
 }
 
 .viewer-stage canvas {
@@ -1084,9 +1305,123 @@ button {
   overflow-wrap: anywhere;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .icon-btn:hover,
+  .small-icon-btn:hover,
+  .primary-btn:hover,
+  .ghost-btn:hover,
+  .danger-btn:hover,
+  .chip:hover,
+  .filter-chip:hover,
+  .seg-btn:hover,
+  .tag-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 var(--border-strong), 0 12px 24px rgba(52, 72, 96, 0.12);
+  }
+
+  .metric-card:hover,
+  .panel:hover,
+  .trade-card:hover,
+  .timeline-item:hover,
+  .chart-card:hover,
+  .settings-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(10, 132, 255, 0.28);
+    box-shadow: 0 16px 34px rgba(52, 72, 96, 0.14);
+  }
+
+  .nav-item:hover {
+    background: rgba(125, 142, 164, 0.11);
+    transform: translateY(-1px);
+  }
+
+  .fab:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 22px 52px rgba(10, 132, 255, 0.32);
+  }
+
+  .upload-zone:hover {
+    transform: translateY(-1px);
+    border-color: rgba(10, 132, 255, 0.42);
+    background: rgba(10, 132, 255, 0.08);
+  }
+
+  .upload-zone:hover::after {
+    transform: translateX(110%);
+  }
+
+  .image-tile:hover {
+    transform: translateY(-2px) scale(1.02);
+    border-color: rgba(10, 132, 255, 0.34);
+    box-shadow: var(--soft-shadow);
+  }
+
+  .image-tile:hover .image-tile-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .bar-row:hover,
+  .calendar-day:not(.empty-day):not(:disabled):hover {
+    transform: translateX(2px);
+  }
+}
+
+.icon-btn:active,
+.small-icon-btn:active,
+.fab:active,
+.primary-btn:active,
+.ghost-btn:active,
+.danger-btn:active,
+.chip:active,
+.filter-chip:active,
+.seg-btn:active,
+.tag-chip:active,
+.nav-item:active {
+  transform: scale(0.94);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes contentRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fieldIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes sheetIn {
@@ -1097,6 +1432,88 @@ button {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sheetOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+}
+
+@keyframes activePop {
+  0% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fabIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes navIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes barGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes detailsIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes imageReveal {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes toastDrop {
+  0% { transform: translate(-50%, -12px); }
+  100% { transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
   }
 }
 
