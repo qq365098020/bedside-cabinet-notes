@@ -32,7 +32,10 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-glide: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --motion-fast: 360ms;
+  --motion-page: 700ms;
+  --motion-nav: 600ms;
   --motion: 1200ms;
   --motion-slow: 1600ms;
   --radius-lg: 24px;
@@ -182,11 +185,11 @@ button {
 }
 
 .screen.is-tab-transition {
-  animation: pageSlideForward var(--motion) var(--ease-out) both;
+  animation: pageRevealDown var(--motion-page) var(--ease-smooth) both;
 }
 
 .screen.is-tab-transition.tab-back {
-  animation-name: pageSlideBack;
+  animation-name: pageRevealDown;
 }
 
 .screen.is-tab-transition .screen-inner > *,
@@ -679,7 +682,7 @@ button {
 }
 
 .bottom-nav.is-tab-transition .nav-indicator {
-  animation: navIndicatorSlide var(--motion) var(--ease-glide) both;
+  animation: navIndicatorSlide var(--motion-nav) var(--ease-glide) both;
 }
 
 .nav-item {
@@ -770,7 +773,7 @@ button {
   background: rgba(9, 13, 18, 0.1);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  animation: fadeIn var(--motion-fast) ease both;
+  animation: fadeIn var(--motion-page) var(--ease-smooth) both;
 }
 
 .modal-panel {
@@ -783,7 +786,7 @@ button {
   border: 1px solid var(--border-strong);
   border-radius: 28px;
   box-shadow: var(--shadow);
-  animation: sheetIn var(--motion) var(--ease-out) both;
+  animation: sheetIn var(--motion-slow) var(--ease-smooth) both;
 }
 
 .modal-backdrop.is-closing {
@@ -1672,14 +1675,15 @@ button {
   }
 }
 
-@keyframes pageSlideForward {
-  from { opacity: 0.86; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes pageSlideBack {
-  from { opacity: 0.86; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes pageRevealDown {
+  from {
+    opacity: 0.38;
+    clip-path: inset(0 0 100% 0 round var(--radius-lg));
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round var(--radius-lg));
+  }
 }
 
 @keyframes navIndicatorSlide {
@@ -1737,8 +1741,8 @@ button {
 
 @keyframes sheetIn {
   from {
-    opacity: 0;
-    transform: translateY(42px) scale(0.96);
+    opacity: 0.18;
+    transform: translateY(52px) scale(0.965);
   }
   to {
     opacity: 1;
