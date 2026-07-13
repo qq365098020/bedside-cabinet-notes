@@ -31,9 +31,10 @@
   --blur: blur(34px) saturate(1.85);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-glide: cubic-bezier(0.22, 0.61, 0.36, 1);
   --motion-fast: 360ms;
-  --motion: 800ms;
-  --motion-slow: 1080ms;
+  --motion: 1200ms;
+  --motion-slow: 1600ms;
   --radius-lg: 24px;
   --radius: 18px;
   --radius-sm: 12px;
@@ -659,11 +660,7 @@ button {
 }
 
 .bottom-nav.is-tab-transition {
-  animation: navReboundForward var(--motion) var(--ease-out) both;
-}
-
-.bottom-nav.is-tab-transition.tab-back {
-  animation-name: navReboundBack;
+  animation: none;
 }
 
 .nav-indicator {
@@ -682,7 +679,7 @@ button {
 }
 
 .bottom-nav.is-tab-transition .nav-indicator {
-  animation: navIndicatorSlide var(--motion) var(--ease-out) both;
+  animation: navIndicatorSlide var(--motion) var(--ease-glide) both;
 }
 
 .nav-item {
@@ -708,7 +705,7 @@ button {
 }
 
 .nav-item.active .nav-icon {
-  animation: activePop var(--motion-fast) var(--ease-out) both;
+  animation: none;
 }
 
 .nav-icon {
@@ -844,18 +841,10 @@ button {
 .trade-form-body.stage-forward .trade-stage-content,
 .trade-form-body.stage-back .trade-stage-content,
 .trade-form-body.stage-forward .stage-tabs,
-.trade-form-body.stage-back .stage-tabs {
-  animation: stageSlideForward var(--motion) var(--ease-out) both;
-}
-
-.trade-form-body.stage-back .trade-stage-content,
-.trade-form-body.stage-back .stage-tabs {
-  animation-name: stageSlideBack;
-}
-
-.trade-form-body.stage-forward,
-.trade-form-body.stage-back {
-  animation: stageBodySettle var(--motion) var(--ease-out) both;
+.trade-form-body.stage-back .stage-tabs,
+.trade-form-body.stage-forward .trade-stage-content *,
+.trade-form-body.stage-back .trade-stage-content * {
+  animation: none !important;
 }
 
 .modal-body > .form-grid,
@@ -945,7 +934,7 @@ button {
 
 .trade-form-body.stage-forward .stage-indicator,
 .trade-form-body.stage-back .stage-indicator {
-  animation: stageIndicatorSlide var(--motion) var(--ease-out) both;
+  animation: stageIndicatorSlide var(--motion) var(--ease-glide) both !important;
 }
 
 .stage-tabs {
@@ -974,6 +963,7 @@ button {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
+  animation: none;
 }
 
 .segmented.segmented-forward .seg-btn.active,
@@ -1683,43 +1673,23 @@ button {
 }
 
 @keyframes pageSlideForward {
-  0% { opacity: 0.82; transform: translateX(34px) translateY(3px); }
-  68% { opacity: 1; transform: translateX(-4px) translateY(-1px); }
-  84% { transform: translateX(2px) translateY(1px); }
-  100% { opacity: 1; transform: translateX(0) translateY(0); }
+  from { opacity: 0.86; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes pageSlideBack {
-  0% { opacity: 0.82; transform: translateX(-34px) translateY(3px); }
-  68% { opacity: 1; transform: translateX(4px) translateY(-1px); }
-  84% { transform: translateX(-2px) translateY(1px); }
-  100% { opacity: 1; transform: translateX(0) translateY(0); }
-}
-
-@keyframes navReboundForward {
-  0% { translate: 0 0; }
-  58% { translate: 9px 0; }
-  78% { translate: -3px 0; }
-  100% { translate: 0 0; }
-}
-
-@keyframes navReboundBack {
-  0% { translate: 0 0; }
-  58% { translate: -9px 0; }
-  78% { translate: 3px 0; }
-  100% { translate: 0 0; }
+  from { opacity: 0.86; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes navIndicatorSlide {
   from { transform: translateX(var(--indicator-start-x)); }
-  68% { transform: translateX(var(--indicator-end-x)) scaleX(1.05); }
-  to { transform: translateX(var(--indicator-end-x)) scaleX(1); }
+  to { transform: translateX(var(--indicator-end-x)); }
 }
 
 @keyframes navIndicatorSlideVertical {
   from { transform: translateY(var(--indicator-start-y)); }
-  68% { transform: translateY(var(--indicator-end-y)) scaleY(1.05); }
-  to { transform: translateY(var(--indicator-end-y)) scaleY(1); }
+  to { transform: translateY(var(--indicator-end-y)); }
 }
 
 @keyframes itemRise {
@@ -1733,31 +1703,9 @@ button {
   }
 }
 
-@keyframes stageSlideForward {
-  0% { opacity: 0.72; transform: translateX(30px) translateY(8px); }
-  66% { opacity: 1; transform: translateX(-3px) translateY(-2px); }
-  84% { transform: translateX(1px) translateY(1px); }
-  100% { opacity: 1; transform: translateX(0) translateY(0); }
-}
-
-@keyframes stageSlideBack {
-  0% { opacity: 0.72; transform: translateX(-30px) translateY(8px); }
-  66% { opacity: 1; transform: translateX(3px) translateY(-2px); }
-  84% { transform: translateX(-1px) translateY(1px); }
-  100% { opacity: 1; transform: translateX(0) translateY(0); }
-}
-
-@keyframes stageBodySettle {
-  0% { transform: translateY(0); }
-  48% { transform: translateY(4px); }
-  72% { transform: translateY(-2px); }
-  100% { transform: translateY(0); }
-}
-
 @keyframes stageIndicatorSlide {
   from { transform: translateX(var(--stage-start-offset)); }
-  68% { transform: translateX(var(--stage-end-offset)) scaleX(1.04); }
-  to { transform: translateX(var(--stage-end-offset)) scaleX(1); }
+  to { transform: translateX(var(--stage-end-offset)); }
 }
 
 @keyframes stageButtonSlide {

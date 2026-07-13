@@ -2535,13 +2535,11 @@ class PriceActionReviewApp {
     this.datePicker = null;
     if (!closingNode) {
       modalRoot.innerHTML = "";
-      if (draftMarket && this.activeTab === draftMarket) this.render();
       return;
     }
     closingNode.classList.add("is-closing");
     window.setTimeout(() => {
       if (modalRoot.firstElementChild === closingNode) modalRoot.innerHTML = "";
-      if (draftMarket && this.activeTab === draftMarket) this.render();
     }, 460);
   }
 }
