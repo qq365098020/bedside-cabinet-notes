@@ -16,6 +16,8 @@ sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$TIMESTAMP\"/" "$REPO/manifest.
 sed -i "s|\"start_url\": \"[^\"]*\"|\"start_url\": \"./index.html?v=$TIMESTAMP\"|" "$REPO/manifest.json"
 printf '{"version":"%s"}\n' "$TIMESTAMP" > "$REPO/version.json"
 sed -i "s|<meta name=\"version\" content=\"[^\"]*\">|<meta name=\"version\" content=\"$TIMESTAMP\">|" "$REPO/index.html"
+sed -E -i "s|href=\"src/styles\.css(\?v=[^\"]*)?\"|href=\"src/styles.css?v=$TIMESTAMP\"|" "$REPO/index.html"
+sed -E -i "s|src=\"src/app\.js(\?v=[^\"]*)?\"|src=\"src/app.js?v=$TIMESTAMP\"|" "$REPO/index.html"
 sed -i "s|const CACHE_NAME = \"[^\"]*\"|const CACHE_NAME = \"bedside-cabinet-notes-v$TIMESTAMP\"|" "$REPO/sw.js"
 
 TOKEN=$(strings -e l ~/桌面/各种API\ Key.wps 2>/dev/null | grep 'ghp_' | head -1)

@@ -97,7 +97,7 @@ class PriceActionReviewApp {
 
   registerServiceWorker() {
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+      navigator.serviceWorker.register(`./sw.js?v=${encodeURIComponent(currentReleaseVersion())}`).catch(() => {});
     }
   }
 
@@ -2303,6 +2303,14 @@ class PriceActionReviewApp {
       if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(registrations.map((registration) => registration.update().catch(() => {})));
+      }
+      if ("caches" in window) {
+        const cacheKeys = await caches.keys();
+        await Promise.all(
+          cacheKeys
+            .filter((key) => key.startsWith("bedside-cabinet-notes-"))
+            .map((key) => caches.delete(key))
+        );
       }
 
       this.toast(`发现新版本 ${latestVersion}，正在刷新`);

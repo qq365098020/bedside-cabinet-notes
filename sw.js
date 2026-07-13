@@ -1,4 +1,4 @@
-const CACHE_NAME = "bedside-cabinet-notes-v20260713-2336";
+const CACHE_NAME = "bedside-cabinet-notes-v20260713-2341";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -27,16 +27,41 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request)
+  const url = new URL(event.request.url);
+  const networkFirst =
+    event.request.mode === "navigate" ||
+    ["script", "style", "worker"].includes(event.request.destination) ||
+    url.pathname.endsWith("/version.json") ||
+    url.pathname.endsWith("/manifest.json");
+
+  if (networkFirst) {
+    event.respondWith(
+      fetch(event.request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
           return response;
         })
-        .catch(() => caches.match("./index.html"));
-    })
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          return cached || caches.match("./index.html");
+        })
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cached) =>
+      cached ||
+      fetch(event.request).then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      })
+    )
   );
 });
