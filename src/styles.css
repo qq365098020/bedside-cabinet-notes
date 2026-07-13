@@ -31,9 +31,9 @@
   --blur: blur(34px) saturate(1.85);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
-  --motion-fast: 180ms;
-  --motion: 320ms;
-  --motion-slow: 480ms;
+  --motion-fast: 360ms;
+  --motion: 800ms;
+  --motion-slow: 1080ms;
   --radius-lg: 24px;
   --radius: 18px;
   --radius-sm: 12px;
@@ -659,34 +659,35 @@ button {
 }
 
 .bottom-nav.is-tab-transition {
-  animation: none;
+  animation: navReboundForward var(--motion) var(--ease-out) both;
 }
 
-.bottom-nav.is-tab-transition .nav-item {
-  animation: navButtonSlideForward var(--motion) var(--ease-out) both;
+.bottom-nav.is-tab-transition.tab-back {
+  animation-name: navReboundBack;
 }
 
-.bottom-nav.is-tab-transition.tab-back .nav-item {
-  animation-name: navButtonSlideBack;
+.nav-indicator {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  z-index: 0;
+  width: calc((100% - 28px) / 5);
+  height: 52px;
+  border: 1px solid rgba(10, 132, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(10, 132, 255, 0.11);
+  box-shadow: inset 0 1px 0 var(--border-strong), 0 8px 22px rgba(10, 132, 255, 0.08);
+  transform: translateX(var(--indicator-end-x));
+  pointer-events: none;
 }
 
-.bottom-nav.is-tab-transition .nav-item:nth-child(2) {
-  animation-delay: 45ms;
-}
-
-.bottom-nav.is-tab-transition .nav-item:nth-child(3) {
-  animation-delay: 90ms;
-}
-
-.bottom-nav.is-tab-transition .nav-item:nth-child(4) {
-  animation-delay: 135ms;
-}
-
-.bottom-nav.is-tab-transition .nav-item:nth-child(5) {
-  animation-delay: 180ms;
+.bottom-nav.is-tab-transition .nav-indicator {
+  animation: navIndicatorSlide var(--motion) var(--ease-out) both;
 }
 
 .nav-item {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   gap: 2px;
@@ -702,7 +703,7 @@ button {
 }
 
 .nav-item.active {
-  background: rgba(10, 132, 255, 0.1);
+  background: transparent;
   color: var(--blue);
 }
 
@@ -841,8 +842,8 @@ button {
 }
 
 .trade-form-body.stage-forward .trade-stage-content,
-.trade-form-body.stage-forward .stage-tabs,
 .trade-form-body.stage-back .trade-stage-content,
+.trade-form-body.stage-forward .stage-tabs,
 .trade-form-body.stage-back .stage-tabs {
   animation: stageSlideForward var(--motion) var(--ease-out) both;
 }
@@ -850,6 +851,11 @@ button {
 .trade-form-body.stage-back .trade-stage-content,
 .trade-form-body.stage-back .stage-tabs {
   animation-name: stageSlideBack;
+}
+
+.trade-form-body.stage-forward,
+.trade-form-body.stage-back {
+  animation: stageBodySettle var(--motion) var(--ease-out) both;
 }
 
 .modal-body > .form-grid,
@@ -913,6 +919,7 @@ button {
 
 .stage-tabs,
 .segmented {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
@@ -920,6 +927,25 @@ button {
   border: 1px solid var(--border);
   border-radius: 18px;
   background: rgba(125, 142, 164, 0.1);
+}
+
+.stage-indicator {
+  position: absolute;
+  inset: 5px auto 5px 5px;
+  z-index: 0;
+  width: calc((100% - 22px) / 3);
+  border: 1px solid rgba(10, 132, 255, 0.4);
+  border-radius: 14px;
+  background: rgba(10, 132, 255, 0.12);
+  box-shadow: inset 0 1px 0 var(--border-strong), 0 8px 18px rgba(10, 132, 255, 0.1);
+  transform: translateX(var(--stage-end-offset));
+  transition: transform var(--motion) var(--ease-out);
+  pointer-events: none;
+}
+
+.trade-form-body.stage-forward .stage-indicator,
+.trade-form-body.stage-back .stage-indicator {
+  animation: stageIndicatorSlide var(--motion) var(--ease-out) both;
 }
 
 .stage-tabs {
@@ -935,11 +961,19 @@ button {
 }
 
 .seg-btn {
+  position: relative;
+  z-index: 1;
   min-height: 38px;
   border-radius: 14px;
   background: transparent;
   box-shadow: none;
   border-color: transparent;
+}
+
+.stage-tabs .seg-btn.active {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .segmented.segmented-forward .seg-btn.active,
@@ -1615,6 +1649,18 @@ button {
   transform: scale(0.94);
 }
 
+.trade-card:active,
+.bar-row:active,
+.calendar-day:not(:disabled):active,
+.date-input:active,
+.date-cell:not(.empty-day):active,
+.upload-zone:active,
+.image-tile:active,
+.advanced summary:active {
+  transform: translateY(2px) scale(0.985);
+  transition-duration: 120ms;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1637,23 +1683,43 @@ button {
 }
 
 @keyframes pageSlideForward {
-  from { transform: translateX(26px); }
-  to { transform: translateX(0); }
+  0% { opacity: 0.82; transform: translateX(34px) translateY(3px); }
+  68% { opacity: 1; transform: translateX(-4px) translateY(-1px); }
+  84% { transform: translateX(2px) translateY(1px); }
+  100% { opacity: 1; transform: translateX(0) translateY(0); }
 }
 
 @keyframes pageSlideBack {
-  from { transform: translateX(-26px); }
-  to { transform: translateX(0); }
+  0% { opacity: 0.82; transform: translateX(-34px) translateY(3px); }
+  68% { opacity: 1; transform: translateX(4px) translateY(-1px); }
+  84% { transform: translateX(-2px) translateY(1px); }
+  100% { opacity: 1; transform: translateX(0) translateY(0); }
 }
 
-@keyframes navButtonSlideForward {
-  from { transform: translateX(12px); }
-  to { transform: translateX(0); }
+@keyframes navReboundForward {
+  0% { translate: 0 0; }
+  58% { translate: 9px 0; }
+  78% { translate: -3px 0; }
+  100% { translate: 0 0; }
 }
 
-@keyframes navButtonSlideBack {
-  from { transform: translateX(-12px); }
-  to { transform: translateX(0); }
+@keyframes navReboundBack {
+  0% { translate: 0 0; }
+  58% { translate: -9px 0; }
+  78% { translate: 3px 0; }
+  100% { translate: 0 0; }
+}
+
+@keyframes navIndicatorSlide {
+  from { transform: translateX(var(--indicator-start-x)); }
+  68% { transform: translateX(var(--indicator-end-x)) scaleX(1.05); }
+  to { transform: translateX(var(--indicator-end-x)) scaleX(1); }
+}
+
+@keyframes navIndicatorSlideVertical {
+  from { transform: translateY(var(--indicator-start-y)); }
+  68% { transform: translateY(var(--indicator-end-y)) scaleY(1.05); }
+  to { transform: translateY(var(--indicator-end-y)) scaleY(1); }
 }
 
 @keyframes itemRise {
@@ -1668,13 +1734,30 @@ button {
 }
 
 @keyframes stageSlideForward {
-  from { transform: translateX(18px); }
-  to { transform: translateX(0); }
+  0% { opacity: 0.72; transform: translateX(30px) translateY(8px); }
+  66% { opacity: 1; transform: translateX(-3px) translateY(-2px); }
+  84% { transform: translateX(1px) translateY(1px); }
+  100% { opacity: 1; transform: translateX(0) translateY(0); }
 }
 
 @keyframes stageSlideBack {
-  from { transform: translateX(-18px); }
-  to { transform: translateX(0); }
+  0% { opacity: 0.72; transform: translateX(-30px) translateY(8px); }
+  66% { opacity: 1; transform: translateX(3px) translateY(-2px); }
+  84% { transform: translateX(-1px) translateY(1px); }
+  100% { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+@keyframes stageBodySettle {
+  0% { transform: translateY(0); }
+  48% { transform: translateY(4px); }
+  72% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes stageIndicatorSlide {
+  from { transform: translateX(var(--stage-start-offset)); }
+  68% { transform: translateX(var(--stage-end-offset)) scaleX(1.04); }
+  to { transform: translateX(var(--stage-end-offset)) scaleX(1); }
 }
 
 @keyframes stageButtonSlide {
@@ -1835,6 +1918,19 @@ button {
   .nav-item {
     min-height: 62px;
     padding: 7px 4px;
+  }
+
+  .nav-indicator {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    width: auto;
+    height: 62px;
+    transform: translateY(var(--indicator-end-y));
+  }
+
+  .bottom-nav.is-tab-transition .nav-indicator {
+    animation-name: navIndicatorSlideVertical;
   }
 
   .nav-label {

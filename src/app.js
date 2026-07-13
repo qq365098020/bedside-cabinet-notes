@@ -53,6 +53,7 @@ class PriceActionReviewApp {
     this.activeTab = "futures";
     this.tabOrder = ["futures", "fx", "btc", "summary", "settings"];
     this.tabMotion = "";
+    this.previousTabIndex = 0;
     this.filters = {
       futures: {},
       fx: {},
@@ -62,6 +63,7 @@ class PriceActionReviewApp {
     };
     this.formTrade = null;
     this.formStage = "plan";
+    this.previousFormStageIndex = 0;
     this.detailTradeId = "";
     this.chartMaps = new Map();
     this.chartAnimations = new Map();
@@ -127,6 +129,11 @@ class PriceActionReviewApp {
     if (event.target.matches("[data-date-picker-backdrop]")) {
       event.preventDefault();
       this.closeDatePicker();
+      return;
+    }
+    if (event.target.matches(".modal-backdrop")) {
+      event.preventDefault();
+      this.closeModal();
       return;
     }
     const target = event.target.closest("[data-action]");
@@ -279,6 +286,7 @@ class PriceActionReviewApp {
     if (!nextTab || nextTab === this.activeTab) return;
     const currentIndex = this.tabOrder.indexOf(this.activeTab);
     const nextIndex = this.tabOrder.indexOf(nextTab);
+    this.previousTabIndex = currentIndex;
     this.tabMotion = nextIndex >= currentIndex ? "forward" : "back";
     this.activeTab = nextTab;
     this.render();
@@ -292,8 +300,17 @@ class PriceActionReviewApp {
       { tab: "summary", label: "汇总数据", icon: "≋" },
       { tab: "settings", label: "设置", icon: "⚙" }
     ];
+    const activeIndex = Math.max(0, tabs.findIndex(({ tab }) => tab === this.activeTab));
+    const previousIndex = Number.isInteger(this.previousTabIndex) ? this.previousTabIndex : activeIndex;
+    const indicatorStyle = [
+      `--indicator-start-x:calc(${previousIndex * 100}% + ${previousIndex * 4}px)`,
+      `--indicator-end-x:calc(${activeIndex * 100}% + ${activeIndex * 4}px)`,
+      `--indicator-start-y:calc(${previousIndex * 100}% + ${previousIndex * 6}px)`,
+      `--indicator-end-y:calc(${activeIndex * 100}% + ${activeIndex * 6}px)`
+    ].join(";");
     return `
-      <nav class="bottom-nav ${motionClass}" aria-label="底部导航">
+      <nav class="bottom-nav ${motionClass}" aria-label="底部导航" style="${indicatorStyle}">
+        <span class="nav-indicator" aria-hidden="true"></span>
         ${tabs
           .map(({ tab, label, icon, image }) => {
             const iconMarkup = image ? `<img class="nav-icon-img" src="${image}" alt="">` : icon;
@@ -596,6 +613,7 @@ class PriceActionReviewApp {
     this.formTrade = existing ? deepClone(existing) : draft || createTrade(market, { symbol }, this.state.settings);
     if (symbol) this.formTrade.symbol = symbol;
     this.formStage = stage;
+    this.previousFormStageIndex = Math.max(0, ["plan", "result", "review"].indexOf(stage));
     this.renderTradeForm();
   }
 
@@ -632,8 +650,11 @@ class PriceActionReviewApp {
   }
 
   renderTradeFormContent(trade, templates = this.state.settings.templates || []) {
+    const stageIndex = Math.max(0, ["plan", "result", "review"].indexOf(this.formStage));
+    const previousStageIndex = Number.isInteger(this.previousFormStageIndex) ? this.previousFormStageIndex : stageIndex;
     return `
-      <div class="stage-tabs">
+      <div class="stage-tabs" style="--stage-start-offset:calc(${previousStageIndex * 100}% + ${previousStageIndex * 6}px);--stage-end-offset:calc(${stageIndex * 100}% + ${stageIndex * 6}px)">
+        <span class="stage-indicator" aria-hidden="true"></span>
         ${this.stageButton("plan", "入场计划")}
         ${this.stageButton("result", "平仓结果")}
         ${this.stageButton("review", "交易复盘")}
@@ -650,7 +671,9 @@ class PriceActionReviewApp {
   setFormStage(stage) {
     if (!stage || stage === this.formStage || !this.formTrade) return;
     const stageOrder = ["plan", "result", "review"];
-    const direction = stageOrder.indexOf(stage) >= stageOrder.indexOf(this.formStage) ? "forward" : "back";
+    const currentIndex = stageOrder.indexOf(this.formStage);
+    const direction = stageOrder.indexOf(stage) >= currentIndex ? "forward" : "back";
+    this.previousFormStageIndex = Math.max(0, currentIndex);
     this.formStage = stage;
     const body = modalRoot.querySelector("[data-trade-form-body]");
     if (!body) {
@@ -661,7 +684,7 @@ class PriceActionReviewApp {
     body.classList.add(`stage-${direction}`);
     body.innerHTML = this.renderTradeFormContent(this.formTrade);
     this.hydrateThumbs(modalRoot);
-    window.setTimeout(() => body.classList.remove("stage-forward", "stage-back"), 520);
+    window.setTimeout(() => body.classList.remove("stage-forward", "stage-back"), 920);
   }
 
   stageButton(stage, label) {
