@@ -1,4 +1,4 @@
-const CACHE_NAME = "bedside-cabinet-notes-v20260713-1952";
+const CACHE_NAME = "bedside-cabinet-notes-v20260713-2118";
 const CORE_ASSETS = [
   "./",
   "./index.html",

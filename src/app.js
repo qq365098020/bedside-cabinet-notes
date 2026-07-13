@@ -346,20 +346,6 @@ class PriceActionReviewApp {
       </header>
 
       <section class="settings-grid">
-        <section class="settings-card settings-card-wide">
-          <div class="split">
-            <h3>备份与导入</h3>
-            <span class="badge">ZIP</span>
-          </div>
-          <div class="form-grid two-col">
-            <button class="primary-btn" data-action="export-backup">导出完整备份</button>
-            <button class="ghost-btn" data-action="trigger-page-import">导入备份</button>
-            <button class="ghost-btn" data-action="export-csv">导出 CSV 表格</button>
-            <button class="ghost-btn" data-action="check-update">检查更新</button>
-            <input id="pageBackupImport" type="file" accept=".zip,application/zip" class="hidden">
-          </div>
-        </section>
-
         <section class="settings-card">
           <h3>版本与数据</h3>
           <div class="kv-grid">
@@ -400,6 +386,19 @@ class PriceActionReviewApp {
             </div>
           </div>
         </section>
+
+        <section class="settings-card settings-card-wide">
+          <div class="split">
+            <h3>备份与导入</h3>
+            <span class="badge">ZIP</span>
+          </div>
+          <div class="form-grid two-col">
+            <button class="primary-btn" data-action="export-backup">导出完整备份</button>
+            <button class="ghost-btn" data-action="trigger-page-import">导入备份</button>
+            <button class="ghost-btn" data-action="export-csv">导出 CSV 表格</button>
+            <input id="pageBackupImport" type="file" accept=".zip,application/zip" class="hidden">
+          </div>
+        </section>
       </section>
     `;
   }
@@ -420,7 +419,7 @@ class PriceActionReviewApp {
           <p class="eyebrow">${new Date().toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" })}</p>
         </div>
         <div class="topbar-actions">
-          <button class="icon-btn" data-action="open-filter" data-scope="${market}" aria-label="筛选" title="筛选交易">⌕</button>
+          <button class="icon-btn" data-action="open-filter" data-scope="${market}" aria-label="筛选" title="筛选交易">${this.searchIcon()}</button>
           <button class="icon-btn" data-action="open-data" aria-label="数据和策略" title="数据和策略">⋯</button>
         </div>
       </header>
@@ -494,6 +493,15 @@ class PriceActionReviewApp {
           <button class="primary-btn" data-action="new-trade" data-market="${market}">继续</button>
         </div>
       </section>
+    `;
+  }
+
+  searchIcon() {
+    return `
+      <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.8" cy="10.8" r="6.3"></circle>
+        <path d="m15.5 15.5 4.2 4.2"></path>
+      </svg>
     `;
   }
 
@@ -1621,7 +1629,7 @@ class PriceActionReviewApp {
           <p class="eyebrow">样本 ${stats.sampleCount} 笔 · 完整复盘 ${stats.completedSampleCount} 笔</p>
         </div>
         <div class="topbar-actions">
-          <button class="icon-btn" data-action="open-filter" data-scope="summary" aria-label="筛选" title="筛选汇总数据">⌕</button>
+          <button class="icon-btn" data-action="open-filter" data-scope="summary" aria-label="筛选" title="筛选汇总数据">${this.searchIcon()}</button>
           <button class="icon-btn" data-action="open-data" aria-label="数据" title="数据和设置">⋯</button>
         </div>
       </header>
