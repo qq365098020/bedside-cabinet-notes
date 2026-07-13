@@ -274,7 +274,7 @@ class PriceActionReviewApp {
           ${page}
         </div>
       </main>
-      ${showFab ? `<button class="fab" data-action="new-trade" data-market="${this.activeTab}" aria-label="新建交易">+</button>` : ""}
+      ${showFab ? `<button class="fab ${motionClass}" data-action="new-trade" data-market="${this.activeTab}" aria-label="新建交易"></button>` : ""}
       ${this.renderBottomNav(motionClass)}
     `;
     this.tabMotion = "";
