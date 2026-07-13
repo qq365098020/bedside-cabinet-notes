@@ -15,8 +15,6 @@
   --surface: rgba(255, 255, 255, 0.36);
   --surface-strong: rgba(255, 255, 255, 0.56);
   --surface-muted: rgba(255, 255, 255, 0.18);
-  --topbar-start: rgba(255, 255, 255, 0.92);
-  --topbar-end: rgba(244, 249, 252, 0.88);
   --border: rgba(125, 142, 164, 0.2);
   --border-strong: rgba(255, 255, 255, 0.42);
   --text: #171a20;
@@ -52,8 +50,6 @@
     --surface: rgba(28, 34, 44, 0.38);
     --surface-strong: rgba(31, 38, 50, 0.6);
     --surface-muted: rgba(38, 45, 58, 0.24);
-    --topbar-start: rgba(18, 23, 31, 0.92);
-    --topbar-end: rgba(18, 29, 31, 0.88);
     --border: rgba(206, 220, 236, 0.13);
     --border-strong: rgba(255, 255, 255, 0.12);
     --text: #f3f6fb;
@@ -71,8 +67,6 @@
   --surface: rgba(255, 255, 255, 0.36);
   --surface-strong: rgba(255, 255, 255, 0.56);
   --surface-muted: rgba(255, 255, 255, 0.18);
-  --topbar-start: rgba(255, 255, 255, 0.92);
-  --topbar-end: rgba(244, 249, 252, 0.88);
   --border: rgba(125, 142, 164, 0.2);
   --border-strong: rgba(255, 255, 255, 0.42);
   --text: #171a20;
@@ -87,8 +81,6 @@
   --surface: rgba(28, 34, 44, 0.38);
   --surface-strong: rgba(31, 38, 50, 0.6);
   --surface-muted: rgba(38, 45, 58, 0.24);
-  --topbar-start: rgba(18, 23, 31, 0.92);
-  --topbar-end: rgba(18, 29, 31, 0.88);
   --border: rgba(206, 220, 236, 0.13);
   --border-strong: rgba(255, 255, 255, 0.12);
   --text: #f3f6fb;
@@ -211,6 +203,15 @@ button {
   animation: none;
 }
 
+.topbar,
+.bottom-nav {
+  background: linear-gradient(135deg, var(--surface), var(--surface-muted));
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(34px) saturate(1.9);
+  -webkit-backdrop-filter: blur(34px) saturate(1.9);
+}
+
 .topbar {
   position: sticky;
   top: 0;
@@ -221,12 +222,7 @@ button {
   grid-template-columns: 1fr auto;
   gap: 10px;
   align-items: center;
-  background: linear-gradient(135deg, var(--topbar-start), var(--topbar-end));
-  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(34px) saturate(1.9);
-  -webkit-backdrop-filter: blur(34px) saturate(1.9);
 }
 
 .eyebrow {
@@ -671,12 +667,7 @@ button {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 4px;
   padding: 4px 6px;
-  background: linear-gradient(135deg, var(--surface), var(--surface-muted));
-  border: 1px solid var(--border-strong);
   border-radius: 22px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(34px) saturate(1.9);
-  -webkit-backdrop-filter: blur(34px) saturate(1.9);
   animation: navIn var(--motion-slow) var(--ease-out) both;
 }
 
