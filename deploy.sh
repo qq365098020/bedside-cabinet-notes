@@ -29,6 +29,25 @@ git add -A
 git commit -m "v${TIMESTAMP}: ${COMMIT_MSG}" || true
 git push "https://${OWNER}:${TOKEN}@github.com/${OWNER}/${REMOTE_REPO}.git" "$BRANCH"
 
+TRIGGER_HTTP=$(curl -sS -o /tmp/price_action_pages_trigger.json -w '%{http_code}' \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Accept: application/vnd.github+json' \
+  "https://api.github.com/repos/${OWNER}/${REMOTE_REPO}/pages/builds")
+
+PUBLISHED_VERSION=""
+if [ "$TRIGGER_HTTP" = "201" ]; then
+  for ATTEMPT in $(seq 1 15); do
+    PUBLISHED_VERSION=$(curl -fsS \
+      "https://${OWNER}.github.io/${REMOTE_REPO}/version.json?deploy=${TIMESTAMP}-${ATTEMPT}" 2>/dev/null \
+      | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
+    if [ "$PUBLISHED_VERSION" = "$TIMESTAMP" ]; then
+      break
+    fi
+    sleep 4
+  done
+fi
+
 PAGES_HTTP=$(curl -sS -o /tmp/price_action_pages_status.json -w '%{http_code}' \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Accept: application/vnd.github+json' \
@@ -39,6 +58,13 @@ echo "推送成功"
 echo "版本: ${TIMESTAMP}"
 if [ "$PAGES_HTTP" = "200" ]; then
   echo "链接: https://${OWNER}.github.io/${REMOTE_REPO}/?v=${TIMESTAMP}"
+  if [ "$PUBLISHED_VERSION" = "$TIMESTAMP" ]; then
+    echo "Pages 已确认发布版本: ${PUBLISHED_VERSION}"
+  elif [ "$TRIGGER_HTTP" = "201" ]; then
+    echo "Pages 构建已触发，线上版本仍在发布中。"
+  else
+    echo "Pages 构建触发失败，HTTP 状态: ${TRIGGER_HTTP}"
+  fi
 else
   echo "GitHub Pages 当前未启用，公开链接不会更新。"
 fi

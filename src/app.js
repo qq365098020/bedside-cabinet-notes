@@ -2269,11 +2269,31 @@ class PriceActionReviewApp {
     const currentVersion = currentReleaseVersion();
     this.toast("正在检查更新");
     try {
-      const response = await fetch(`./version.json?check=${Date.now()}`, { cache: "no-store" });
-      if (!response.ok) throw new Error("版本文件读取失败");
+      const checkId = Date.now();
+      const response = await fetch(`./version.json?check=${checkId}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("线上版本文件读取失败");
       const remote = await response.json();
       const latestVersion = String(remote.version || "").trim();
       if (!latestVersion) throw new Error("版本号为空");
+
+      let repositoryVersion = "";
+      try {
+        const repositoryResponse = await fetch(
+          `https://raw.githubusercontent.com/qq365098020/bedside-cabinet-notes/main/version.json?check=${checkId}`,
+          { cache: "no-store" }
+        );
+        if (repositoryResponse.ok) {
+          const repositoryRemote = await repositoryResponse.json();
+          repositoryVersion = String(repositoryRemote.version || "").trim();
+        }
+      } catch (_) {
+        repositoryVersion = "";
+      }
+
+      if (repositoryVersion && repositoryVersion !== latestVersion) {
+        this.toast(`新版本 ${repositoryVersion} 正在发布，请稍后再试`);
+        return;
+      }
 
       if (latestVersion === currentVersion) {
         this.toast(`已是最新版本 ${currentVersion}`);
