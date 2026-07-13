@@ -29,3 +29,10 @@ After each completed modification, report:
 ```bash
 bash deploy.sh "short change summary"
 ```
+
+## Update Cache Troubleshooting
+
+- If the public version number changes but the interface still looks old, first inspect the published HTML and confirm both `src/styles.css` and `src/app.js` include the current `?v=<version>` query.
+- Keep page navigations, styles, scripts, workers, `version.json`, and `manifest.json` on the service worker's network-first path. Do not restore cache-first handling for these resources.
+- The update action should clear only caches whose names start with `bedside-cabinet-notes-` before loading the new version.
+- Verify a release by checking the public `version.json`, the version meta tag, the versioned CSS/JS URLs, and the published service worker—not only the Git push result.
