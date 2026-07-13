@@ -298,7 +298,7 @@ class PriceActionReviewApp {
           .map(({ tab, label, icon, image }) => {
             const iconMarkup = image ? `<img class="nav-icon-img" src="${image}" alt="">` : icon;
             return `
-              <button class="nav-item ${this.activeTab === tab ? "active" : ""}" data-action="switch-tab" data-tab="${tab}">
+              <button class="nav-item ${this.activeTab === tab ? "active" : ""}" data-action="switch-tab" data-tab="${tab}" aria-label="${label}" title="${label}" ${this.activeTab === tab ? 'aria-current="page"' : ""}>
                 <span class="nav-icon" aria-hidden="true">${iconMarkup}</span>
                 <span class="nav-label">${label}</span>
               </button>
@@ -323,8 +323,8 @@ class PriceActionReviewApp {
           <p class="eyebrow">版本 ${escapeHtml(releaseVersion)} · 数据结构 ${APP_VERSION}</p>
         </div>
         <div class="topbar-actions">
-          <button class="icon-btn" data-action="check-update" aria-label="检查更新">↻</button>
-          <button class="icon-btn" data-action="open-data" aria-label="更多设置">⋯</button>
+          <button class="icon-btn" data-action="check-update" aria-label="检查更新" title="检查更新">↻</button>
+          <button class="icon-btn" data-action="open-data" aria-label="更多设置" title="更多设置">⋯</button>
         </div>
       </header>
 
@@ -403,8 +403,8 @@ class PriceActionReviewApp {
           <p class="eyebrow">${new Date().toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" })}</p>
         </div>
         <div class="topbar-actions">
-          <button class="icon-btn" data-action="open-filter" data-scope="${market}" aria-label="筛选">⌕</button>
-          <button class="icon-btn" data-action="open-data" aria-label="数据和策略">⋯</button>
+          <button class="icon-btn" data-action="open-filter" data-scope="${market}" aria-label="筛选" title="筛选交易">⌕</button>
+          <button class="icon-btn" data-action="open-data" aria-label="数据和策略" title="数据和策略">⋯</button>
         </div>
       </header>
 
@@ -446,9 +446,22 @@ class PriceActionReviewApp {
           </div>
         </div>
         <div class="trade-list">
-          ${recent.length ? recent.map((trade) => this.tradeCard(trade)).join("") : `<div class="empty">还没有交易记录</div>`}
+          ${recent.length ? recent.map((trade) => this.tradeCard(trade)).join("") : this.renderTradeEmptyState(market, Object.keys(filters).length > 0)}
         </div>
       </section>
+    `;
+  }
+
+  renderTradeEmptyState(market, filtered = false) {
+    return `
+      <div class="empty empty-state">
+        <span class="empty-icon" aria-hidden="true">${filtered ? "⌕" : "+"}</span>
+        <strong>${filtered ? "没有符合筛选条件的交易" : "记录第一笔交易"}</strong>
+        <p>${filtered ? "可以清除筛选后查看全部记录。" : "把计划、执行和结果放在一起，复盘会更有价值。"}</p>
+        <button class="${filtered ? "ghost-btn" : "primary-btn"}" data-action="${filtered ? "clear-filters" : "new-trade"}" data-scope="${market}" data-market="${market}">
+          ${filtered ? "清除筛选" : "新增交易"}
+        </button>
+      </div>
     `;
   }
 
@@ -1585,8 +1598,8 @@ class PriceActionReviewApp {
           <p class="eyebrow">样本 ${stats.sampleCount} 笔 · 完整复盘 ${stats.completedSampleCount} 笔</p>
         </div>
         <div class="topbar-actions">
-          <button class="icon-btn" data-action="open-filter" data-scope="summary" aria-label="筛选">⌕</button>
-          <button class="icon-btn" data-action="open-data" aria-label="数据">⋯</button>
+          <button class="icon-btn" data-action="open-filter" data-scope="summary" aria-label="筛选" title="筛选汇总数据">⌕</button>
+          <button class="icon-btn" data-action="open-data" aria-label="数据" title="数据和设置">⋯</button>
         </div>
       </header>
 

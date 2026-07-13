@@ -31,9 +31,9 @@
   --blur: blur(34px) saturate(1.85);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
-  --motion-fast: 420ms;
-  --motion: 760ms;
-  --motion-slow: 1200ms;
+  --motion-fast: 180ms;
+  --motion: 320ms;
+  --motion-slow: 480ms;
   --radius-lg: 24px;
   --radius: 18px;
   --radius-sm: 12px;
@@ -604,6 +604,38 @@ button {
   border-radius: var(--radius);
 }
 
+.empty-state {
+  min-height: 184px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.05), rgba(45, 191, 99, 0.04));
+}
+
+.empty-state strong {
+  color: var(--text);
+  font-size: 17px;
+}
+
+.empty-state p {
+  max-width: 420px;
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+
+.empty-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(10, 132, 255, 0.12);
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 700;
+}
+
 .bottom-nav {
   position: fixed;
   left: 12px;
@@ -723,6 +755,11 @@ button {
   transition:
     transform var(--motion-fast) var(--ease-out),
     box-shadow var(--motion-fast) ease;
+}
+
+:where(button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid rgba(10, 132, 255, 0.52);
+  outline-offset: 3px;
 }
 
 .modal-backdrop {
@@ -1752,6 +1789,16 @@ button {
   .screen {
     scroll-behavior: auto !important;
   }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @media (min-width: 820px) {
@@ -1762,5 +1809,39 @@ button {
 
   .modal-backdrop {
     place-items: center;
+  }
+}
+
+@media (min-width: 1180px) {
+  .screen {
+    padding-left: 132px;
+  }
+
+  .bottom-nav {
+    left: 16px;
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    width: 104px;
+    max-width: none;
+    height: auto;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 8px;
+    transform: translateY(-50%);
+    animation: none;
+  }
+
+  .nav-item {
+    min-height: 62px;
+    padding: 7px 4px;
+  }
+
+  .nav-label {
+    font-size: 11px;
+  }
+
+  .fab {
+    right: max(24px, calc((100vw - 1252px) / 2));
   }
 }
