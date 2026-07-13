@@ -217,10 +217,6 @@ button {
   animation: pageFluidIn 850ms var(--ease-smooth) both;
 }
 
-.screen-inner > .page-fluid-layer.is-fluid-settled {
-  animation: none;
-}
-
 .topbar,
 .bottom-nav {
   background: linear-gradient(135deg, var(--chrome-surface), var(--chrome-muted));
@@ -1732,10 +1728,15 @@ button {
     filter: blur(12px) saturate(0.82);
     clip-path: ellipse(72% 0% at 50% 0%);
   }
-  to {
+  88% {
     opacity: 1;
     filter: blur(0) saturate(1);
     clip-path: ellipse(145% 145% at 50% 0%);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) saturate(1);
+    clip-path: ellipse(180% 180% at 50% 0%);
   }
 }
 
