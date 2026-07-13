@@ -268,10 +268,11 @@ class PriceActionReviewApp {
           ? this.renderSettingsPage()
           : this.renderMarketPage(this.activeTab);
     const showFab = ["futures", "fx", "btc"].includes(this.activeTab);
+    const layeredPage = this.wrapPageContent(page);
     root.innerHTML = `
       <main class="screen screen-${this.activeTab} ${motionClass}" data-page="${this.activeTab}">
         <div class="screen-inner">
-          ${page}
+          ${layeredPage}
         </div>
       </main>
       ${showFab ? `<button class="fab ${motionClass}" data-action="new-trade" data-market="${this.activeTab}" aria-label="新建交易"></button>` : ""}
@@ -280,6 +281,39 @@ class PriceActionReviewApp {
     this.tabMotion = "";
     this.hydrateThumbs();
     this.drawCharts();
+    this.settlePageTransition(motionClass);
+  }
+
+  wrapPageContent(page) {
+    const headerEnd = page.indexOf("</header>");
+    if (headerEnd < 0) return `<div class="page-fluid-layer">${page}</div>`;
+    const splitAt = headerEnd + "</header>".length;
+    return `${page.slice(0, splitAt)}<div class="page-fluid-layer">${page.slice(splitAt)}</div>`;
+  }
+
+  settlePageTransition(motionClass) {
+    if (!motionClass) return;
+    const screen = root.querySelector(".screen.is-tab-transition");
+    const layer = screen?.querySelector(".page-fluid-layer");
+    const nav = root.querySelector(".bottom-nav.is-tab-transition");
+    const fab = root.querySelector(".fab.is-tab-transition");
+    if (!screen || !layer) return;
+    let settled = false;
+    const finish = () => {
+      if (settled || !screen.isConnected) return;
+      settled = true;
+      layer.classList.add("is-fluid-settled");
+      screen.classList.remove("is-tab-transition", "tab-forward", "tab-back");
+      nav?.classList.remove("is-tab-transition", "tab-forward", "tab-back");
+      fab?.classList.remove("is-tab-transition", "tab-forward", "tab-back");
+    };
+    const handleAnimationEnd = (event) => {
+      if (event.target !== layer) return;
+      layer.removeEventListener("animationend", handleAnimationEnd);
+      finish();
+    };
+    layer.addEventListener("animationend", handleAnimationEnd);
+    window.setTimeout(finish, 1000);
   }
 
   switchTab(nextTab) {
