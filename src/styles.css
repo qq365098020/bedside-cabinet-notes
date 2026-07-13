@@ -185,14 +185,16 @@ button {
 }
 
 .screen.is-tab-transition {
-  animation: pageFluidIn 850ms var(--ease-smooth) both;
+  animation: none;
+  filter: none;
+  clip-path: none;
 }
 
 .screen.is-tab-transition.tab-back {
-  animation-name: pageFluidIn;
+  animation: none;
 }
 
-.screen.is-tab-transition .screen-inner > *,
+.screen.is-tab-transition .topbar,
 .screen.is-tab-transition .metric-grid > *,
 .screen.is-tab-transition .trade-list > *,
 .screen.is-tab-transition .summary-grid > *,
@@ -201,6 +203,18 @@ button {
 .screen.is-tab-transition .bar-list > *,
 .screen.is-tab-transition .image-strip > * {
   animation: none;
+}
+
+.screen.is-tab-transition .screen-inner > :not(.topbar) {
+  animation: pageContentIn var(--motion-page) var(--ease-smooth) both;
+}
+
+.screen.is-tab-transition .screen-inner > :not(.topbar):nth-child(3) {
+  animation-delay: 70ms;
+}
+
+.screen.is-tab-transition .screen-inner > :not(.topbar):nth-child(n + 4) {
+  animation-delay: 140ms;
 }
 
 .topbar,
@@ -1708,16 +1722,14 @@ button {
   }
 }
 
-@keyframes pageFluidIn {
+@keyframes pageContentIn {
   from {
-    opacity: 0.2;
-    filter: blur(12px) saturate(0.82);
-    clip-path: ellipse(72% 0% at 50% 0%);
+    opacity: 0;
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    filter: blur(0) saturate(1);
-    clip-path: ellipse(145% 145% at 50% 0%);
+    transform: translateY(0);
   }
 }
 
